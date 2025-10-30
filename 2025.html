@@ -7,7 +7,13 @@
 <style>
   body { font-family: "Poppins", Arial, sans-serif; text-align: center; background: #fffbee; margin-top: 50px; color: #333; }
   h1 { color: #222; }
-  input { font-size: 1.2rem; padding: 8px; width: 300px; border-radius: 6px; border: 1px solid #aaa; }
+  input { 
+    font-size: 1.2rem; 
+    padding: 8px; 
+    width: 300px; 
+    border-radius: 6px; 
+    border: 1px solid #aaa; 
+  }
   button { 
     font-size: 1.1rem; 
     margin: 10px; 
@@ -32,7 +38,17 @@
 <h1>🐝 Spelling Bee Practice</h1>
 <p id="prompt">Press "Start" to begin!</p>
 
-<input id="answer" type="text" placeholder="Type the word..." disabled />
+<!-- ✅ Autocomplete & Spellcheck Disabled -->
+<input 
+  id="answer" 
+  type="text" 
+  placeholder="Type the word..." 
+  disabled 
+  autocomplete="off" 
+  autocorrect="off" 
+  autocapitalize="off" 
+  spellcheck="false"
+/>
 <br>
 <button id="start">Start</button>
 <button id="repeat" disabled>🔁 Repeat Word</button>

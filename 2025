@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spelling Bee Practice</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; background: #fafafa; margin-top: 50px; }
+  h1 { color: #333; }
+  input { font-size: 1.2rem; padding: 8px; width: 300px; }
+  button { font-size: 1.1rem; margin: 10px; padding: 8px 16px; cursor: pointer; }
+  .correct { color: green; }
+  .incorrect { color: red; }
+  #progress { width: 80%; margin: 20px auto; background: #ddd; border-radius: 10px; overflow: hidden; }
+  #bar { height: 20px; background: #4CAF50; width: 0%; }
+</style>
+</head>
+<body>
+
+<h1>Spelling Bee Practice 🐝</h1>
+<p id="prompt">Press "Start" to begin!</p>
+
+<input id="answer" type="text" placeholder="Type the word..." disabled />
+<br>
+<button id="start">Start</button>
+<button id="submit" disabled>Submit</button>
+
+<div id="feedback"></div>
+
+<div id="progress">
+  <div id="bar"></div>
+</div>
+
+<p id="score">Score: 0 / 0</p>
+
+<script>
+const words = [
+  "hesitate", "scorcher", "scavenger", "fragments", "deflated", "unleash",
+  "ration", "cosmetics", "crawdad", "frustration", "unruly", "mascot",
+  "aroma", "moustache", "artifacts", "perfume", "discoveries", "sinister",
+  "tuxedo", "prognosis", "lurches", "language", "gallop", "buffalo",
+  "sequins", "fluently", "fabulous", "lanky", "sardines", "mysterious",
+  "brandished", "rickety", "anguish", "conical", "porridge", "lilt",
+  "pediatric", "beige", "democracy", "rummage", "gaunt", "ancestral",
+  "grimace", "nautical", "enormous", "geranium", "foreign", "dubious",
+  "ebony", "paltry"
+];
+
+let shuffled = [];
+let currentIndex = 0;
+let score = 0;
+
+const synth = window.speechSynthesis;
+const prompt = document.getElementById("prompt");
+const answer = document.getElementById("answer");
+const feedback = document.getElementById("feedback");
+const scoreDisplay = document.getElementById("score");
+const startBtn = document.getElementById("start");
+const submitBtn = document.getElementById("submit");
+const bar = document.getElementById("bar");
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function speak(text) {
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "en-US";
+  synth.speak(utter);
+}
+
+function startGame() {
+  shuffled = shuffle([...words]);
+  currentIndex = 0;
+  score = 0;
+  scoreDisplay.textContent = `Score: 0 / ${shuffled.length}`;
+  feedback.textContent = "";
+  startBtn.disabled = true;
+  answer.disabled = false;
+  submitBtn.disabled = false;
+  nextWord();
+}
+
+function nextWord() {
+  if (currentIndex >= shuffled.length) {
+    prompt.textContent = "🎉 All done! Final score:";
+    feedback.innerHTML = `<b>${score} / ${shuffled.length}</b>`;
+    speak("All done! Great job!");
+    startBtn.disabled = false;
+    answer.disabled = true;
+    submitBtn.disabled = true;
+    return;
+  }
+
+  const word = shuffled[currentIndex];
+  prompt.textContent = `Word #${currentIndex + 1}`;
+  speak(word);
+  answer.value = "";
+  answer.focus();
+
+  updateProgress();
+}
+
+function checkAnswer() {
+  const userWord = answer.value.trim().toLowerCase();
+  const correctWord = shuffled[currentIndex].toLowerCase();
+
+  if (userWord === correctWord) {
+    feedback.innerHTML = `<span class="correct">✅ Correct!</span>`;
+    score++;
+  } else {
+    feedback.innerHTML = `<span class="incorrect">❌ Incorrect.</span> The correct spelling is <b>${correctWord}</b>.`;
+  }
+
+  scoreDisplay.textContent = `Score: ${score} / ${shuffled.length}`;
+  currentIndex++;
+  nextWord();
+}
+
+function updateProgress() {
+  const percent = ((currentIndex / shuffled.length) * 100).toFixed(0);
+  bar.style.width = percent + "%";
+}
+
+startBtn.addEventListener("click", startGame);
+submitBtn.addEventListener("click", checkAnswer);
+answer.addEventListener("keyup", (e) => {
+  if (e.key === "Enter") checkAnswer();
+});
+</script>
+
+</body>
+</html>

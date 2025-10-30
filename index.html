@@ -55,6 +55,11 @@
     border: 1px solid #aaa;
     font-size: 1rem;
   }
+  #missedWords {
+    margin-top: 20px;
+    font-size: 1rem;
+    color: #c00;
+  }
 </style>
 </head>
 <body>
@@ -68,7 +73,6 @@
 
 <p id="prompt">Press "Start" to begin!</p>
 
-<!-- ✅ Autocomplete & Spellcheck Disabled -->
 <input
   id="answer"
   type="text"
@@ -91,6 +95,7 @@
 </div>
 
 <p id="score">Score: 0 / 0</p>
+<div id="missedWords"></div>
 
 <script>
 const words = [
@@ -109,6 +114,7 @@ let shuffled = [];
 let currentIndex = 0;
 let score = 0;
 let currentWord = "";
+let missed = [];
 let synth = window.speechSynthesis;
 let voices = [];
 let selectedVoice = null;
@@ -123,6 +129,7 @@ const submitBtn = document.getElementById("submit");
 const repeatBtn = document.getElementById("repeat");
 const bar = document.getElementById("bar");
 const voiceSelect = document.getElementById("voiceSelect");
+const missedWords = document.getElementById("missedWords");
 
 // 🔊 Load voices
 function populateVoices() {
@@ -133,11 +140,18 @@ function populateVoices() {
     const option = document.createElement("option");
     option.value = i;
     option.textContent = `${voice.name} (${voice.lang})`;
-    if (voice.default) option.textContent += " — DEFAULT";
     voiceSelect.appendChild(option);
   });
 
-  selectedVoice = voices.find(v => v.default) || voices[0];
+  // Set default to Google US English if available
+  const googleVoice = voices.find(v => v.name.includes("Google US English"));
+  selectedVoice = googleVoice || voices.find(v => v.default) || voices[0];
+
+  // Set dropdown to that voice
+  if (selectedVoice) {
+    const index = voices.indexOf(selectedVoice);
+    if (index >= 0) voiceSelect.value = index;
+  }
 }
 
 populateVoices();
@@ -166,7 +180,9 @@ function startGame() {
   shuffled = shuffle([...words]);
   currentIndex = 0;
   score = 0;
+  missed = [];
   feedback.textContent = "";
+  missedWords.innerHTML = "";
   scoreDisplay.textContent = `Score: 0 / ${shuffled.length}`;
   startBtn.disabled = true;
   answer.disabled = false;
@@ -184,6 +200,10 @@ function nextWord() {
     answer.disabled = true;
     submitBtn.disabled = true;
     repeatBtn.disabled = true;
+
+    if (missed.length > 0) {
+      missedWords.innerHTML = "<b>Missed Words:</b><br>" + missed.join(", ");
+    }
     return;
   }
 
@@ -199,6 +219,19 @@ function repeatWord() {
   if (currentWord) speak(currentWord);
 }
 
+function highlightDifferences(user, correct) {
+  let result = "";
+  const maxLen = Math.max(user.length, correct.length);
+  for (let i = 0; i < maxLen; i++) {
+    if (user[i] === correct[i]) {
+      result += `<span>${correct[i] || ""}</span>`;
+    } else {
+      result += `<span style="color:red;">${correct[i] || ""}</span>`;
+    }
+  }
+  return result;
+}
+
 function checkAnswer() {
   const userWord = answer.value.trim().toLowerCase();
   const correctWord = currentWord.toLowerCase();
@@ -207,12 +240,14 @@ function checkAnswer() {
     feedback.innerHTML = `<span class="correct">✅ Correct!</span>`;
     score++;
   } else {
-    feedback.innerHTML = `<span class="incorrect">❌ Incorrect.</span> The correct spelling is <b>${correctWord}</b>.`;
+    const diff = highlightDifferences(userWord, correctWord);
+    feedback.innerHTML = `<span class="incorrect">❌ Incorrect.</span> Correct spelling: <b>${diff}</b>`;
+    missed.push(correctWord);
   }
 
   scoreDisplay.textContent = `Score: ${score} / ${shuffled.length}`;
   currentIndex++;
-  setTimeout(nextWord, 1000);
+  setTimeout(nextWord, 1500);
 }
 
 function updateProgress() {

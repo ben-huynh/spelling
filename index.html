@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,6 +62,136 @@
     color: #c00;
   }
 </style>
+
+<script>
+const wordLists = {
+  "4th Grade": [
+    "hesitate","scorcher","scavenger","fragments","deflated","unleash",
+    "ration","cosmetics","crawdad","frustration","unruly","mascot",
+    "aroma","moustache","mustache","artifacts","artefacts","perfume",
+    "discoveries","sinister","tuxedo","prognosis","lurches","language",
+    "gallop","Buffalo","sequins","fluently","fabulous","lanky",
+    "sardines","mysterious","brandished","rickety","anguish","conical",
+    "porridge","lilt","pediatric","beige","democracy","rummage",
+    "gaunt","ancestral","grimace","nautical","enormous","geranium",
+    "foreign","dubious","ebony","paltry"
+  ],
+  "5th Grade": [
+    "verdict","garbled","encourages","imitation","miniature","receptionist",
+    "preamble","plausible","reprimanding","commotion","oblivion","immigrants",
+    "steeple","spectators","lanyards","suspicious","parchment","ramshackle",
+    "fugitive","heron","dissolving","nomad","billowed","skewer","Berlin",
+    "lunacy","conjure","bracken","noggin","neon","rakish","hypnosis",
+    "rotunda","gusto","toiletries","gleaned","jeered","winsome","prattling",
+    "galore","emporium","atrium","eccentric","savant","almanac","hippies",
+    "samosas","campaign","pistachio","mosque"
+  ],
+  "6th Grade": [
+    "zombielike","warlock","colossus","convulsively","dimensional","garishly",
+    "graffitist","Everest","dexterity","cavorting","marauder","conscience",
+    "battlements","deferential","albatross","khaki","opalescent","asphalt",
+    "Yiddish","talcum","tranquilizer","equestrian","plaited","monsieur",
+    "manticores","prestigious","fraidycat","guttural","lo","mein","courier",
+    "sans","serif","psyche","stucco","Frankenstein","schema","et","cetera",
+    "vidimus","delphine","slough","archipelago","serape","puissance",
+    "pinioning","chignon","pheromone","galleon","magnanimous","chartreuse",
+    "wainscoting","Nehru"
+  ],
+  "7th Grade": [
+    "gangly","swaggering","chimneys","riveted","plaid","dirge","zeal",
+    "whittled","depots","fiberglass","salvaged","fissures","enthusiastic",
+    "discipline","unfamiliar","scurrying","dignitaries","pizzeria","dismissal",
+    "skittish","careened","nomination","opportunist","dictatorship","comrades",
+    "sporadic","promenade","repugnant","invincible","renowned","parachute",
+    "laborious","appointment","foreseeable","ratify","scalpel","reclusive",
+    "compassionate","bulletin","alfalfa","officially","confidant","bayonet",
+    "amicable","exuberant","beautician","equations","assignment","ultimatum",
+    "whinnying"
+  ],
+  "8th Grade": [
+    "squalor","memoirs","cylinders","ominous","muffler","syndrome","premises",
+    "safari","lasagna","substantially","mercantile","formidable","propaganda",
+    "marquee","proficient","compunction","emphatically","hyperventilated",
+    "ostracism","onslaught","ruefully","misanthrope","prototype","cravenly",
+    "mulberry","hypocritical","chlorine","traumatic","receipts","solemnly",
+    "begrudge","contentious","precocious","ensemble","cadre","lye","belfry",
+    "lacrosse","sluice","cajolery","vigilance","residuals","boutique",
+    "peroxide","aristocracy","apocalypse","tuberculosis","barricade","confreres",
+    "anonymously","unparalleled","barrette","chassis","junket","quandary",
+    "Erie","gingham","silhouette","auxiliary","thesaurus","patriarchs",
+    "chandelier","dulce","concierge","latticework","hibiscus","tamale","maracas",
+    "gyroplane","burpees","Adriatic","piccolo","au","revoir","tulle","boll",
+    "weevil","camphor","Tucson","paparazzi","pumpernickel","pogrom"
+  ]
+};
+
+let selectedGrade = "4th Grade";
+let words = [...wordLists[selectedGrade]];
+let currentWordIndex = 0;
+let correctCount = 0;
+
+document.addEventListener("DOMContentLoaded", () => {
+  const dropdown = document.createElement("select");
+  dropdown.id = "gradeSelect";
+  dropdown.style.margin = "10px";
+  Object.keys(wordLists).forEach(grade => {
+    const option = document.createElement("option");
+    option.value = grade;
+    option.textContent = grade;
+    dropdown.appendChild(option);
+  });
+  document.body.insertBefore(dropdown, document.body.firstChild);
+
+  dropdown.addEventListener("change", (e) => {
+    selectedGrade = e.target.value;
+    words = [...wordLists[selectedGrade]];
+    currentWordIndex = 0;
+    correctCount = 0;
+    updateProgress();
+    sayWord();
+  });
+});
+
+// Speak the current word using existing Google voice
+function sayWord() {
+  const word = words[currentWordIndex];
+  const utterance = new SpeechSynthesisUtterance(word);
+  utterance.lang = "en-US";
+  speechSynthesis.speak(utterance);
+}
+
+// Check spelling input
+function checkSpelling(input) {
+  const correctWord = words[currentWordIndex].toLowerCase();
+  const typed = input.toLowerCase().trim();
+
+  const alternatePairs = {
+    "moustache": "mustache",
+    "mustache": "moustache",
+    "artifacts": "artefacts",
+    "artefacts": "artifacts"
+  };
+
+  const isCorrect =
+    typed === correctWord ||
+    (alternatePairs[typed] && alternatePairs[typed] === correctWord);
+
+  if (isCorrect) {
+    correctCount++;
+    currentWordIndex++;
+    updateProgress();
+    if (currentWordIndex < words.length) sayWord();
+  }
+}
+
+function updateProgress() {
+  const progress = (correctCount / words.length) * 100;
+  document.getElementById("progress-bar").style.width = progress + "%";
+  document.getElementById("progress-text").textContent =
+    `${correctCount}/${words.length}`;
+}
+</script>
+
 </head>
 <body>
 
@@ -69,17 +200,6 @@
 <!-- 🎙️ Voice selector -->
 <label for="voiceSelect"><b>Choose voice:</b></label>
 <select id="voiceSelect"></select>
-<br><br>
-
-<!-- 🏫 Grade selector -->
-<label for="gradeSelect"><b>Choose grade:</b></label>
-<select id="gradeSelect">
-  <option value="4">4th Grade</option>
-  <option value="5">5th Grade</option>
-  <option value="6">6th Grade</option>
-  <option value="7">7th Grade</option>
-  <option value="8">8th Grade</option>
-</select>
 <br><br>
 
 <p id="prompt">Press "Start" to begin!</p>
@@ -98,3 +218,181 @@
 <button id="start">Start</button>
 <button id="repeat" disabled>🔁 Repeat Word</button>
 <button id="submit" disabled>Submit</button>
+
+<div id="feedback"></div>
+
+<div id="progress">
+  <div id="bar"></div>
+</div>
+
+<p id="score">Score: 0 / 0</p>
+<div id="missedWords"></div>
+
+<script>
+const words = [
+  "hesitate", "scorcher", "scavenger", "fragments", "deflated", "unleash",
+  "ration", "cosmetics", "crawdad", "frustration", "unruly", "mascot",
+  "aroma", "moustache", "artifacts", "perfume", "discoveries", "sinister",
+  "tuxedo", "prognosis", "lurches", "language", "gallop", "buffalo",
+  "sequins", "fluently", "fabulous", "lanky", "sardines", "mysterious",
+  "brandished", "rickety", "anguish", "conical", "porridge", "lilt",
+  "pediatric", "beige", "democracy", "rummage", "gaunt", "ancestral",
+  "grimace", "nautical", "enormous", "geranium", "foreign", "dubious",
+  "ebony", "paltry"
+];
+
+let shuffled = [];
+let currentIndex = 0;
+let score = 0;
+let currentWord = "";
+let missed = [];
+let synth = window.speechSynthesis;
+let voices = [];
+let selectedVoice = null;
+
+// UI Elements
+const prompt = document.getElementById("prompt");
+const answer = document.getElementById("answer");
+const feedback = document.getElementById("feedback");
+const scoreDisplay = document.getElementById("score");
+const startBtn = document.getElementById("start");
+const submitBtn = document.getElementById("submit");
+const repeatBtn = document.getElementById("repeat");
+const bar = document.getElementById("bar");
+const voiceSelect = document.getElementById("voiceSelect");
+const missedWords = document.getElementById("missedWords");
+
+// 🔊 Load voices
+function populateVoices() {
+  voices = synth.getVoices().filter(v => v.lang.startsWith("en"));
+  voiceSelect.innerHTML = "";
+
+  voices.forEach((voice, i) => {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = `${voice.name} (${voice.lang})`;
+    voiceSelect.appendChild(option);
+  });
+
+  // Set default to Google US English if available
+  const googleVoice = voices.find(v => v.name.includes("Google US English"));
+  selectedVoice = googleVoice || voices.find(v => v.default) || voices[0];
+
+  // Set dropdown to that voice
+  if (selectedVoice) {
+    const index = voices.indexOf(selectedVoice);
+    if (index >= 0) voiceSelect.value = index;
+  }
+}
+
+populateVoices();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = populateVoices;
+}
+
+voiceSelect.addEventListener("change", () => {
+  selectedVoice = voices[voiceSelect.value];
+});
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function speak(text) {
+  if (synth.speaking) synth.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = selectedVoice?.lang || "en-US";
+  utter.voice = selectedVoice || null;
+  utter.rate = 0.9;
+  synth.speak(utter);
+}
+
+function startGame() {
+  shuffled = shuffle([...words]);
+  currentIndex = 0;
+  score = 0;
+  missed = [];
+  feedback.textContent = "";
+  missedWords.innerHTML = "";
+  scoreDisplay.textContent = `Score: 0 / ${shuffled.length}`;
+  startBtn.disabled = true;
+  answer.disabled = false;
+  submitBtn.disabled = false;
+  repeatBtn.disabled = false;
+  nextWord();
+}
+
+function nextWord() {
+  if (currentIndex >= shuffled.length) {
+    prompt.textContent = "🎉 All done!";
+    feedback.innerHTML = `<b>Final score: ${score} / ${shuffled.length}</b>`;
+    speak("All done! Great job!");
+    startBtn.disabled = false;
+    answer.disabled = true;
+    submitBtn.disabled = true;
+    repeatBtn.disabled = true;
+
+    if (missed.length > 0) {
+      missedWords.innerHTML = "<b>Missed Words:</b><br>" + missed.join(", ");
+    }
+    return;
+  }
+
+  currentWord = shuffled[currentIndex];
+  prompt.textContent = `Word #${currentIndex + 1}`;
+  speak(currentWord);
+  answer.value = "";
+  answer.focus();
+  updateProgress();
+}
+
+function repeatWord() {
+  if (currentWord) speak(currentWord);
+}
+
+function highlightDifferences(user, correct) {
+  let result = "";
+  const maxLen = Math.max(user.length, correct.length);
+  for (let i = 0; i < maxLen; i++) {
+    if (user[i] === correct[i]) {
+      result += `<span>${correct[i] || ""}</span>`;
+    } else {
+      result += `<span style="color:red;">${correct[i] || ""}</span>`;
+    }
+  }
+  return result;
+}
+
+function checkAnswer() {
+  const userWord = answer.value.trim().toLowerCase();
+  const correctWord = currentWord.toLowerCase();
+
+  if (userWord === correctWord) {
+    feedback.innerHTML = `<span class="correct">✅ Correct!</span>`;
+    score++;
+  } else {
+    const diff = highlightDifferences(userWord, correctWord);
+    feedback.innerHTML = `<span class="incorrect">❌ Incorrect.</span> Correct spelling: <b>${diff}</b>`;
+    missed.push(correctWord);
+  }
+
+  scoreDisplay.textContent = `Score: ${score} / ${shuffled.length}`;
+  currentIndex++;
+  setTimeout(nextWord, 1500);
+}
+
+function updateProgress() {
+  const percent = ((currentIndex / shuffled.length) * 100).toFixed(0);
+  bar.style.width = percent + "%";
+}
+
+startBtn.addEventListener("click", startGame);
+submitBtn.addEventListener("click", checkAnswer);
+repeatBtn.addEventListener("click", repeatWord);
+answer.addEventListener("keyup", (e) => {
+  if (e.key === "Enter") checkAnswer();
+});
+</script>
+
+</body>
+</html>

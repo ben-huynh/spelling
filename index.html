@@ -188,6 +188,58 @@ const voiceSelect = document.getElementById("voiceSelect");
 const gradeSelect = document.getElementById("gradeSelect");
 const missedWords = document.getElementById("missedWords");
 
+// --- Voice and Dropdown Setup ---
+
+// Function to populate the voice dropdown
+function populateVoiceList() {
+    voices = synth.getVoices();
+    voiceSelect.innerHTML = ''; // Clear previous options
+
+    // Filter for English voices and prioritize a default one
+    let defaultVoice = null;
+    let engVoices = voices.filter(v => v.lang.startsWith('en'));
+
+    // Try to find a good US English voice
+    defaultVoice = engVoices.find(v => v.name.includes('Google US English') || v.name.includes('Microsoft David'));
+
+    engVoices.forEach((voice, i) => {
+        const option = document.createElement("option");
+        option.textContent = `${voice.name} (${voice.lang})`;
+        option.setAttribute('data-lang', voice.lang);
+        option.setAttribute('data-name', voice.name);
+        option.value = i;
+        voiceSelect.appendChild(option);
+    });
+
+    // Set a default selected voice
+    if (defaultVoice) {
+        selectedVoice = defaultVoice;
+        const defaultIndex = voices.findIndex(v => v.name === defaultVoice.name && v.lang === defaultVoice.lang);
+        voiceSelect.value = defaultIndex !== -1 ? defaultIndex : voiceSelect.value;
+    } else if (engVoices.length > 0) {
+        selectedVoice = engVoices[0]; // Fallback to first English voice
+        voiceSelect.value = engVoices[0].value;
+    } else {
+        selectedVoice = voices[0] || null; // Fallback to first available voice
+    }
+}
+
+// Critical: Voices load asynchronously, so listen for the 'voiceschanged' event.
+// This is the most likely reason the voice dropdown wasn't loading in Chrome.
+if (synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = populateVoiceList;
+} else {
+    // Fallback for browsers that don't fire voiceschanged immediately
+    populateVoiceList();
+}
+
+
+// Event listener for voice selection change
+voiceSelect.addEventListener("change", () => {
+    const voiceIndex = parseInt(voiceSelect.value);
+    selectedVoice = voices[voiceIndex];
+});
+
 // Populate grade dropdown
 for (const grade in wordLists) {
     const option = document.createElement("option");
@@ -196,12 +248,179 @@ for (const grade in wordLists) {
     gradeSelect.appendChild(option);
 }
 gradeSelect.value = selectedGrade;
-gradeSelect.addEventListener("change", () => {
-    selectedGrade = gradeSelect.value;
-    words = [...wordLists[selectedGrade]];
+
+// Function to reset state when grade changes or game starts
+function resetGame() {
     shuffled = [];
     currentIndex = 0;
     score = 0;
+    currentWord = "";
     missed = [];
     feedback.textContent = "";
-   
+    scoreDisplay.textContent = `Score: 0 / 0`;
+    missedWords.textContent = "";
+    bar.style.width = '0%';
+    prompt.textContent = "Press \"Start\" to begin!";
+    answer.value = "";
+    answer.disabled = true;
+    submitBtn.disabled = true;
+    repeatBtn.disabled = true;
+    startBtn.textContent = "Start";
+    startBtn.disabled = false;
+}
+
+// Grade change event listener
+gradeSelect.addEventListener("change", () => {
+    selectedGrade = gradeSelect.value;
+    words = [...wordLists[selectedGrade]]; // Update words list
+    resetGame();
+});
+
+// --- Remaining Game Logic Functions (Stubs for completion) ---
+
+// You will need to complete the following functions for the game to work:
+
+// Fisher-Yates (Knuth) Shuffle for words
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+// Text-to-Speech function
+function speakWord(word) {
+    if (!synth || !selectedVoice) {
+        alert("Text-to-speech not available or voice not selected.");
+        return;
+    }
+    synth.cancel(); // Stop any current speech
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.voice = selectedVoice;
+    utterance.rate = 0.7; // A bit slower for clarity
+    utterance.pitch = 1;
+    synth.speak(utterance);
+}
+
+// Function to start a new word
+function nextWord() {
+    if (currentIndex >= shuffled.length) {
+        endGame();
+        return;
+    }
+
+    currentWord = shuffled[currentIndex];
+    prompt.textContent = `Word ${currentIndex + 1} of ${shuffled.length}`;
+    answer.value = "";
+    answer.disabled = false;
+    submitBtn.disabled = false;
+    repeatBtn.disabled = false;
+    answer.focus();
+
+    speakWord(currentWord);
+
+    updateProgress();
+}
+
+// Function to update progress bar and score
+function updateProgress() {
+    const total = words.length;
+    const completed = currentIndex;
+    const percentage = (completed / total) * 100;
+    bar.style.width = `${percentage}%`;
+    scoreDisplay.textContent = `Score: ${score} / ${completed}`;
+
+    // Update missed words display
+    if (missed.length > 0) {
+        missedWords.innerHTML = '<strong>Missed Words:</strong> ' + missed.map(item => `${item.word} (${item.attempt})`).join(', ');
+    } else {
+        missedWords.textContent = '';
+    }
+}
+
+// Function to handle game submission
+function checkSpelling() {
+    const submission = answer.value.trim().toLowerCase();
+    const correct = currentWord.toLowerCase();
+
+    // Disable input and buttons while checking/displaying feedback
+    answer.disabled = true;
+    submitBtn.disabled = true;
+    repeatBtn.disabled = true;
+
+    if (submission === correct) {
+        feedback.className = "correct";
+        feedback.textContent = `✅ Correct! It's ${currentWord}.`;
+        score++;
+    } else {
+        feedback.className = "incorrect";
+        feedback.textContent = `❌ Incorrect. The correct spelling is ${currentWord}.`;
+        missed.push({ word: currentWord, attempt: submission });
+    }
+
+    currentIndex++;
+
+    // Wait a moment, then move to the next word or end the game
+    setTimeout(() => {
+        feedback.textContent = "";
+        nextWord();
+    }, 2000);
+}
+
+// Function to end the game
+function endGame() {
+    updateProgress();
+    const finalScore = `${score} / ${shuffled.length}`;
+    prompt.textContent = `Game Over! Final Score: ${finalScore}`;
+    startBtn.textContent = "Play Again";
+    startBtn.disabled = false;
+    answer.disabled = true;
+    submitBtn.disabled = true;
+    repeatBtn.disabled = true;
+
+    if (missed.length > 0) {
+        missedWords.innerHTML += '<br>Time to review your misses!';
+    }
+}
+
+// --- Event Handlers ---
+
+// Start Button
+startBtn.addEventListener("click", () => {
+    if (startBtn.textContent === "Start" || startBtn.textContent === "Play Again") {
+        resetGame(); // Ensure full reset on a new game
+        shuffled = shuffleArray([...words]);
+        nextWord();
+        startBtn.textContent = "Restart";
+    } else if (startBtn.textContent === "Restart") {
+        // Reset and start a new game with the current grade
+        resetGame();
+        startBtn.textContent = "Start";
+    }
+});
+
+// Submit Button
+submitBtn.addEventListener("click", checkSpelling);
+
+// Repeat Button
+repeatBtn.addEventListener("click", () => {
+    if (currentWord) {
+        speakWord(currentWord);
+    }
+});
+
+// Allow 'Enter' key to submit
+answer.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" && !submitBtn.disabled) {
+        checkSpelling();
+    }
+});
+
+// Initial game state setup
+resetGame();
+
+});
+</script>
+</body>
+</html>

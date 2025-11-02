@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,259 +9,171 @@
     font-family: "Poppins", Arial, sans-serif;
     text-align: center;
     background: #fffbee;
-    margin-top: 50px;
     color: #333;
+    margin: 0;
+    padding: 0;
   }
-  h1 { color: #222; }
-  input {
-    font-size: 1.2rem;
-    padding: 8px;
-    width: 300px;
-    border-radius: 6px;
-    border: 1px solid #aaa;
+  h1 {
+    color: #f4b400;
+    margin-top: 20px;
+  }
+  select, input, button {
+    font-size: 1rem;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
   }
   button {
-    font-size: 1.1rem;
-    margin: 10px;
-    padding: 8px 16px;
-    cursor: pointer;
-    border-radius: 8px;
+    background: #f4b400;
+    color: #fff;
     border: none;
-    background: #ffce00;
-    transition: all 0.2s ease;
+    cursor: pointer;
   }
-  button:hover { background: #ffd633; }
-  button:disabled { background: #ddd; cursor: not-allowed; }
-  .correct { color: green; font-weight: bold; }
-  .incorrect { color: red; font-weight: bold; }
-  #progress {
-    width: 80%;
-    margin: 20px auto;
-    background: #ddd;
-    border-radius: 10px;
-    overflow: hidden;
-    height: 20px;
+  button:hover {
+    background: #e09e00;
   }
-  #bar {
-    height: 100%;
-    background: #4CAF50;
-    width: 0%;
-    transition: width 0.4s ease;
-  }
-  #feedback { margin: 10px; height: 40px; }
-  select {
-    padding: 6px 8px;
-    border-radius: 6px;
-    border: 1px solid #aaa;
-    font-size: 1rem;
-  }
-  #missedWords {
+  #result {
+    font-size: 1.2rem;
     margin-top: 20px;
-    font-size: 1rem;
-    color: #c00;
+    font-weight: bold;
   }
 </style>
 </head>
 <body>
+  <h1>Spelling Bee Practice</h1>
 
-<h1>🐝 Spelling Bee Practice</h1>
+  <div>
+    <label for="grade">Choose grade:</label>
+    <select id="grade">
+      <option value="4">4th Grade</option>
+      <option value="5">5th Grade</option>
+      <option value="6">6th Grade</option>
+      <option value="7">7th Grade</option>
+      <option value="8">8th Grade</option>
+    </select>
+  </div>
 
-<!-- 🎙️ Voice selector -->
-<label for="voiceSelect"><b>Choose voice:</b></label>
-<select id="voiceSelect"></select>
-<br><br>
+  <div>
+    <button id="startBtn">Start</button>
+    <button id="repeatBtn" disabled>Repeat Word</button>
+  </div>
 
-<p id="prompt">Press "Start" to begin!</p>
+  <div>
+    <input type="text" id="spellingInput" placeholder="Type your spelling here" disabled>
+    <button id="checkBtn" disabled>Check</button>
+  </div>
 
-<input
-  id="answer"
-  type="text"
-  placeholder="Type the word..."
-  disabled
-  autocomplete="off"
-  autocorrect="off"
-  autocapitalize="off"
-  spellcheck="false"
-/>
-<br>
-<button id="start">Start</button>
-<button id="repeat" disabled>🔁 Repeat Word</button>
-<button id="submit" disabled>Submit</button>
-
-<div id="feedback"></div>
-
-<div id="progress">
-  <div id="bar"></div>
-</div>
-
-<p id="score">Score: 0 / 0</p>
-<div id="missedWords"></div>
+  <div id="result"></div>
 
 <script>
-const words = [
-  "hesitate", "scorcher", "scavenger", "fragments", "deflated", "unleash",
-  "ration", "cosmetics", "crawdad", "frustration", "unruly", "mascot",
-  "aroma", "moustache", "artifacts", "perfume", "discoveries", "sinister",
-  "tuxedo", "prognosis", "lurches", "language", "gallop", "buffalo",
-  "sequins", "fluently", "fabulous", "lanky", "sardines", "mysterious",
-  "brandished", "rickety", "anguish", "conical", "porridge", "lilt",
-  "pediatric", "beige", "democracy", "rummage", "gaunt", "ancestral",
-  "grimace", "nautical", "enormous", "geranium", "foreign", "dubious",
-  "ebony", "paltry"
-];
+// -------------------------------
+// WORD LISTS BY GRADE
+// -------------------------------
+const wordLists = {
+  4: [
+    "hesitate","scorcher","scavenger","fragments","deflated","unleash",
+    "ration","cosmetics","crawdad","frustration","unruly","mascot",
+    "aroma","moustache","artifacts","perfume","discoveries","sinister",
+    "tuxedo","prognosis","lurches","language","gallop","Buffalo","sequins",
+    "fluently","fabulous","lanky","sardines","mysterious","brandished",
+    "rickety","anguish","conical","porridge","lilt","pediatric","beige",
+    "democracy","rummage","gaunt","ancestral","grimace","nautical",
+    "enormous","geranium","foreign","dubious","ebony","paltry"
+  ],
+  5: ["verdict","garbled","encourages","imitation","miniature","receptionist","preamble","plausible","reprimanding","commotion","oblivion","immigrants","steeple","spectators","lanyards","suspicious","parchment","ramshackle","fugitive","heron","dissolving","nomad","billowed","skewer","Berlin","lunacy","conjure","bracken","noggin","neon","rakish","hypnosis","rotunda","gusto","toiletries","gleaned","jeered","winsome","prattling","galore","emporium","atrium","eccentric","savant","almanac","hippies","samosas","campaign","pistachio","mosque"],
+  6: ["zombielike","warlock","colossus","convulsively","dimensional","garishly","graffitist","Everest","dexterity","cavorting","marauder","conscience","battlements","deferential","albatross","khaki","opalescent","asphalt","Yiddish","talcum","tranquilizer","equestrian","plaited","monsieur","manticores","prestigious","fraidycat","guttural","lo","mein","courier","sans","serif","psyche","stucco","Frankenstein","schema","et","cetera","vidimus","delphine","slough","archipelago","serape","puissance","pinioning","chignon","pheromone","galleon","magnanimous","chartreuse","wainscoting","Nehru"],
+  7: ["gangly","swaggering","chimneys","riveted","plaid","dirge","zeal","whittled","depots","fiberglass","salvaged","fissures","enthusiastic","discipline","unfamiliar","scurrying","dignitaries","pizzeria","dismissal","skittish","careened","nomination","opportunist","dictatorship","comrades","sporadic","promenade","repugnant","invincible","renowned","parachute","laborious","appointment","foreseeable","ratify","scalpel","reclusive","compassionate","bulletin","alfalfa","officially","confidant","bayonet","amicable","exuberant","beautician","equations","assignment","ultimatum","whinnying"],
+  8: ["squalor","memoirs","cylinders","ominous","muffler","syndrome","premises","safari","lasagna","substantially","mercantile","formidable","propaganda","marquee","proficient","compunction","emphatically","hyperventilated","ostracism","onslaught","ruefully","misanthrope","prototype","cravenly","mulberry","hypocritical","chlorine","traumatic","receipts","solemnly","begrudge","contentious","precocious","ensemble","cadre","lye","belfry","lacrosse","sluice","cajolery","vigilance","residuals","boutique","peroxide","aristocracy","apocalypse","tuberculosis","barricade","confreres","anonymously","unparalleled","barrette","chassis","junket","quandary","Erie","gingham","silhouette","auxiliary","thesaurus","patriarchs","chandelier","dulce","concierge","latticework","hibiscus","tamale","maracas","gyroplane","burpees","Adriatic","piccolo","au","revoir","tulle","boll","weevil","camphor","Tucson","paparazzi","pumpernickel","pogrom"]
+};
 
-let shuffled = [];
-let currentIndex = 0;
-let score = 0;
+// -------------------------------
+// ALTERNATE SPELLINGS
+// -------------------------------
+const alternates = {
+  moustache: ["mustache"],
+  mustache: ["moustache"],
+  artifacts: ["artefacts"],
+  artefacts: ["artifacts"]
+};
+
+// -------------------------------
+// GLOBALS
+// -------------------------------
 let currentWord = "";
-let missed = [];
-let synth = window.speechSynthesis;
-let voices = [];
-let selectedVoice = null;
+let currentList = [];
+let preferredVoice = null;
 
-// UI Elements
-const prompt = document.getElementById("prompt");
-const answer = document.getElementById("answer");
-const feedback = document.getElementById("feedback");
-const scoreDisplay = document.getElementById("score");
-const startBtn = document.getElementById("start");
-const submitBtn = document.getElementById("submit");
-const repeatBtn = document.getElementById("repeat");
-const bar = document.getElementById("bar");
-const voiceSelect = document.getElementById("voiceSelect");
-const missedWords = document.getElementById("missedWords");
-
-// 🔊 Load voices
-function populateVoices() {
-  voices = synth.getVoices().filter(v => v.lang.startsWith("en"));
-  voiceSelect.innerHTML = "";
-
-  voices.forEach((voice, i) => {
-    const option = document.createElement("option");
-    option.value = i;
-    option.textContent = `${voice.name} (${voice.lang})`;
-    voiceSelect.appendChild(option);
-  });
-
-  // Set default to Google US English if available
-  const googleVoice = voices.find(v => v.name.includes("Google US English"));
-  selectedVoice = googleVoice || voices.find(v => v.default) || voices[0];
-
-  // Set dropdown to that voice
-  if (selectedVoice) {
-    const index = voices.indexOf(selectedVoice);
-    if (index >= 0) voiceSelect.value = index;
-  }
+// -------------------------------
+// SETUP VOICE (iPad SAFE)
+// -------------------------------
+function selectPreferredVoice(prefName = "Samantha") {
+  const voices = speechSynthesis.getVoices();
+  return voices.find(v => v.name === prefName)
+      || voices.find(v => v.lang === "en-US")
+      || voices[0];
 }
 
-populateVoices();
-if (speechSynthesis.onvoiceschanged !== undefined) {
-  speechSynthesis.onvoiceschanged = populateVoices;
-}
+speechSynthesis.onvoiceschanged = () => {
+  preferredVoice = selectPreferredVoice("Samantha");
+};
 
-voiceSelect.addEventListener("change", () => {
-  selectedVoice = voices[voiceSelect.value];
-});
-
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
-
+// -------------------------------
+// FUNCTIONS
+// -------------------------------
 function speak(text) {
-  if (synth.speaking) synth.cancel();
   const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = selectedVoice?.lang || "en-US";
-  utter.voice = selectedVoice || null;
-  utter.rate = 0.9;
-  synth.speak(utter);
+  const voice = preferredVoice || selectPreferredVoice("Samantha");
+  utter.voice = voice;
+  utter.lang = voice.lang;
+  speechSynthesis.speak(utter);
 }
 
-function startGame() {
-  shuffled = shuffle([...words]);
-  currentIndex = 0;
-  score = 0;
-  missed = [];
-  feedback.textContent = "";
-  missedWords.innerHTML = "";
-  scoreDisplay.textContent = `Score: 0 / ${shuffled.length}`;
-  startBtn.disabled = true;
-  answer.disabled = false;
-  submitBtn.disabled = false;
-  repeatBtn.disabled = false;
-  nextWord();
+function pickNewWord() {
+  const grade = document.getElementById("grade").value;
+  currentList = wordLists[grade];
+  const randomIndex = Math.floor(Math.random() * currentList.length);
+  currentWord = currentList[randomIndex];
 }
 
-function nextWord() {
-  if (currentIndex >= shuffled.length) {
-    prompt.textContent = "🎉 All done!";
-    feedback.innerHTML = `<b>Final score: ${score} / ${shuffled.length}</b>`;
-    speak("All done! Great job!");
-    startBtn.disabled = false;
-    answer.disabled = true;
-    submitBtn.disabled = true;
-    repeatBtn.disabled = true;
-
-    if (missed.length > 0) {
-      missedWords.innerHTML = "<b>Missed Words:</b><br>" + missed.join(", ");
-    }
-    return;
-  }
-
-  currentWord = shuffled[currentIndex];
-  prompt.textContent = `Word #${currentIndex + 1}`;
+function startTest() {
+  pickNewWord();
   speak(currentWord);
-  answer.value = "";
-  answer.focus();
-  updateProgress();
+  document.getElementById("repeatBtn").disabled = false;
+  document.getElementById("spellingInput").disabled = false;
+  document.getElementById("checkBtn").disabled = false;
+  document.getElementById("result").textContent = "";
+  document.getElementById("spellingInput").value = "";
 }
 
 function repeatWord() {
-  if (currentWord) speak(currentWord);
+  speak(currentWord);
 }
 
-function highlightDifferences(user, correct) {
-  let result = "";
-  const maxLen = Math.max(user.length, correct.length);
-  for (let i = 0; i < maxLen; i++) {
-    if (user[i] === correct[i]) {
-      result += `<span>${correct[i] || ""}</span>`;
-    } else {
-      result += `<span style="color:red;">${correct[i] || ""}</span>`;
-    }
-  }
-  return result;
-}
+function checkSpelling() {
+  const input = document.getElementById("spellingInput").value.trim().toLowerCase();
+  const correct = currentWord.toLowerCase();
 
-function checkAnswer() {
-  const userWord = answer.value.trim().toLowerCase();
-  const correctWord = currentWord.toLowerCase();
+  // Check alternates (both directions)
+  const validAnswers = [correct, ...(alternates[correct] || []), ...(alternates[input] || [])];
 
-  if (userWord === correctWord) {
-    feedback.innerHTML = `<span class="correct">✅ Correct!</span>`;
-    score++;
+  if (validAnswers.includes(input)) {
+    document.getElementById("result").textContent = "✅ Correct!";
+    document.getElementById("result").style.color = "green";
+    pickNewWord();
+    setTimeout(() => speak(currentWord), 1200);
   } else {
-    const diff = highlightDifferences(userWord, correctWord);
-    feedback.innerHTML = `<span class="incorrect">❌ Incorrect.</span> Correct spelling: <b>${diff}</b>`;
-    missed.push(correctWord);
+    document.getElementById("result").textContent = `❌ Incorrect. The correct spelling is "${currentWord}".`;
+    document.getElementById("result").style.color = "red";
   }
-
-  scoreDisplay.textContent = `Score: ${score} / ${shuffled.length}`;
-  currentIndex++;
-  setTimeout(nextWord, 1500);
 }
 
-function updateProgress() {
-  const percent = ((currentIndex / shuffled.length) * 100).toFixed(0);
-  bar.style.width = percent + "%";
-}
-
-startBtn.addEventListener("click", startGame);
-submitBtn.addEventListener("click", checkAnswer);
-repeatBtn.addEventListener("click", repeatWord);
-answer.addEventListener("keyup", (e) => {
-  if (e.key === "Enter") checkAnswer();
-});
+// -------------------------------
+// EVENT LISTENERS
+// -------------------------------
+document.getElementById("startBtn").addEventListener("click", startTest);
+document.getElementById("repeatBtn").addEventListener("click", repeatWord);
+document.getElementById("checkBtn").addEventListener("click", checkSpelling);
 </script>
-
 </body>
 </html>

@@ -190,55 +190,56 @@ const missedWords = document.getElementById("missedWords");
 
 // --- Voice and Dropdown Setup ---
 
-// Function to populate the voice dropdown
-function populateVoiceList() {
-    voices = synth.getVoices();
-    voiceSelect.innerHTML = ''; // Clear previous options
+// 🔊 Load voices
+function populateVoices() {
+  voices = synth.getVoices().filter(v => v.lang.startsWith("en"));
+  voiceSelect.innerHTML = "";
 
-    // Filter for English voices and prioritize a default one
-    let defaultVoice = null;
-    let engVoices = voices.filter(v => v.lang.startsWith('en'));
+  voices.forEach((voice, i) => {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = `${voice.name} (${voice.lang})`;
+    voiceSelect.appendChild(option);
+  });
 
-    // Try to find a good US English voice
-    defaultVoice = engVoices.find(v => v.name.includes('Google US English') || v.name.includes('Microsoft David'));
+  // Set default to Google US English if available
+  const googleVoice = voices.find(v => v.name.includes("Google US English"));
+  selectedVoice = googleVoice || voices.find(v => v.default) || voices[0];
 
-    engVoices.forEach((voice, i) => {
-        const option = document.createElement("option");
-        option.textContent = `${voice.name} (${voice.lang})`;
-        option.setAttribute('data-lang', voice.lang);
-        option.setAttribute('data-name', voice.name);
-        option.value = i;
-        voiceSelect.appendChild(option);
-    });
-
-    // Set a default selected voice
-    if (defaultVoice) {
-        selectedVoice = defaultVoice;
-        const defaultIndex = voices.findIndex(v => v.name === defaultVoice.name && v.lang === defaultVoice.lang);
-        voiceSelect.value = defaultIndex !== -1 ? defaultIndex : voiceSelect.value;
-    } else if (engVoices.length > 0) {
-        selectedVoice = engVoices[0]; // Fallback to first English voice
-        voiceSelect.value = engVoices[0].value;
-    } else {
-        selectedVoice = voices[0] || null; // Fallback to first available voice
-    }
+  // Set dropdown to that voice
+  if (selectedVoice) {
+    const index = voices.indexOf(selectedVoice);
+    if (index >= 0) voiceSelect.value = index;
+  }
 }
 
-// Critical: Voices load asynchronously, so listen for the 'voiceschanged' event.
-// This is the most likely reason the voice dropdown wasn't loading in Chrome.
-if (synth.onvoiceschanged !== undefined) {
-    synth.onvoiceschanged = populateVoiceList;
-} else {
-    // Fallback for browsers that don't fire voiceschanged immediately
-    populateVoiceList();
+populateVoices();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = populateVoices;
 }
 
+voiceSelect.addEventListener("change", () => {
+  selectedVoice = voices[voiceSelect.value];
+});
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function speak(text) {
+  if (synth.speaking) synth.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = selectedVoice?.lang || "en-US";
+  utter.voice = selectedVoice || null;
+  utter.rate = 0.9;
+  synth.speak(utter);
+}
 
 // Event listener for voice selection change
-voiceSelect.addEventListener("change", () => {
-    const voiceIndex = parseInt(voiceSelect.value);
-    selectedVoice = voices[voiceIndex];
-});
+//voiceSelect.addEventListener("change", () => {
+//    const voiceIndex = parseInt(voiceSelect.value);
+//    selectedVoice = voices[voiceIndex];
+//});
 
 // Populate grade dropdown
 for (const grade in wordLists) {

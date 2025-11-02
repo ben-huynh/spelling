@@ -66,12 +66,10 @@
 
 <h1>🐝 Spelling Bee Practice</h1>
 
-<!-- 🎓 Grade dropdown -->
 <label for="gradeSelect"><b>Select Grade:</b></label>
 <select id="gradeSelect"></select>
 <br><br>
 
-<!-- 🎙️ Voice selector -->
 <label for="voiceSelect"><b>Choose voice:</b></label>
 <select id="voiceSelect"></select>
 <br><br>
@@ -103,6 +101,8 @@
 <div id="missedWords"></div>
 
 <script>
+document.addEventListener("DOMContentLoaded", () => {
+
 const wordLists = {
   "4th Grade": [
     "hesitate","scorcher","scavenger","fragments","deflated","unleash",
@@ -164,6 +164,8 @@ const wordLists = {
   ]
 };
 
+let selectedGrade = "4th Grade";
+let words = [...wordLists[selectedGrade]];
 let shuffled = [];
 let currentIndex = 0;
 let score = 0;
@@ -172,8 +174,6 @@ let missed = [];
 let synth = window.speechSynthesis;
 let voices = [];
 let selectedVoice = null;
-let selectedGrade = "4th Grade";
-let words = [...wordLists[selectedGrade]];
 
 // UI Elements
 const prompt = document.getElementById("prompt");
@@ -189,4 +189,19 @@ const gradeSelect = document.getElementById("gradeSelect");
 const missedWords = document.getElementById("missedWords");
 
 // Populate grade dropdown
-for (
+for (const grade in wordLists) {
+    const option = document.createElement("option");
+    option.value = grade;
+    option.textContent = grade;
+    gradeSelect.appendChild(option);
+}
+gradeSelect.value = selectedGrade;
+gradeSelect.addEventListener("change", () => {
+    selectedGrade = gradeSelect.value;
+    words = [...wordLists[selectedGrade]];
+    shuffled = [];
+    currentIndex = 0;
+    score = 0;
+    missed = [];
+    feedback.textContent = "";
+   

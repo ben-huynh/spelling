@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,6 +61,46 @@
     color: #c00;
   }
 </style>
+</head>
+<body>
+
+<h1>🐝 Spelling Bee Practice</h1>
+
+<!-- 🎓 Grade dropdown -->
+<label for="gradeSelect"><b>Select Grade:</b></label>
+<select id="gradeSelect"></select>
+<br><br>
+
+<!-- 🎙️ Voice selector -->
+<label for="voiceSelect"><b>Choose voice:</b></label>
+<select id="voiceSelect"></select>
+<br><br>
+
+<p id="prompt">Press "Start" to begin!</p>
+
+<input
+  id="answer"
+  type="text"
+  placeholder="Type the word..."
+  disabled
+  autocomplete="off"
+  autocorrect="off"
+  autocapitalize="off"
+  spellcheck="false"
+/>
+<br>
+<button id="start">Start</button>
+<button id="repeat" disabled>🔁 Repeat Word</button>
+<button id="submit" disabled>Submit</button>
+
+<div id="feedback"></div>
+
+<div id="progress">
+  <div id="bar"></div>
+</div>
+
+<p id="score">Score: 0 / 0</p>
+<div id="missedWords"></div>
 
 <script>
 const wordLists = {
@@ -134,6 +173,7 @@ let synth = window.speechSynthesis;
 let voices = [];
 let selectedVoice = null;
 let selectedGrade = "4th Grade";
+let words = [...wordLists[selectedGrade]];
 
 // UI Elements
 const prompt = document.getElementById("prompt");
@@ -145,346 +185,8 @@ const submitBtn = document.getElementById("submit");
 const repeatBtn = document.getElementById("repeat");
 const bar = document.getElementById("bar");
 const voiceSelect = document.getElementById("voiceSelect");
+const gradeSelect = document.getElementById("gradeSelect");
 const missedWords = document.getElementById("missedWords");
 
-// 🎓 Grade dropdown
-const gradeSelect = document.createElement("select");
-gradeSelect.id = "gradeSelect";
-for (const grade in wordLists) {
-  const opt = document.createElement("option");
-  opt.value = grade;
-  opt.textContent = grade;
-  gradeSelect.appendChild(opt);
-}
-document.body.insertBefore(gradeSelect, prompt);
-
-// Update word list on grade change
-gradeSelect.addEventListener("change", () => {
-  selectedGrade = gradeSelect.value;
-  shuffled = [];
-  currentIndex = 0;
-  score = 0;
-  missed = [];
-  words = [...wordLists[selectedGrade]];
-  feedback.textContent = "";
-  missedWords.innerHTML = "";
-  scoreDisplay.textContent = `Score: 0 / ${words.length}`;
-  answer.value = "";
-});
-
-// 🔊 Load voices
-function populateVoices() {
-  voices = synth.getVoices().filter(v => v.lang.startsWith("en"));
-  voiceSelect.innerHTML = "";
-  voices.forEach((voice, i) => {
-    const option = document.createElement("option");
-    option.value = i;
-    option.textContent = `${voice.name} (${voice.lang})`;
-    voiceSelect.appendChild(option);
-  });
-  const googleVoice = voices.find(v => v.name.includes("Google US English"));
-  selectedVoice = googleVoice || voices.find(v => v.default) || voices[0];
-  if (selectedVoice) {
-    const index = voices.indexOf(selectedVoice);
-    if (index >= 0) voiceSelect.value = index;
-  }
-}
-populateVoices();
-if (speechSynthesis.onvoiceschanged !== undefined) {
-  speechSynthesis.onvoiceschanged = populateVoices;
-}
-voiceSelect.addEventListener("change", () => {
-  selectedVoice = voices[voiceSelect.value];
-});
-
-// 🐝 Game functions
-function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
-function speak(text) {
-  if (synth.speaking) synth.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = selectedVoice?.lang || "en-US";
-  utter.voice = selectedVoice || null;
-  utter.rate = 0.9;
-  synth.speak(utter);
-}
-
-function startGame() {
-  shuffled = shuffle([...wordLists[selectedGrade]]);
-  currentIndex = 0;
-  score = 0;
-  missed = [];
-  feedback.textContent = "";
-  missedWords.innerHTML = "";
-  scoreDisplay.textContent = `Score: 0 / ${shuffled.length}`;
-  startBtn.disabled = true;
-  answer.disabled = false;
-  submitBtn.disabled = false;
-  repeatBtn.disabled = false;
-  nextWord();
-}
-
-function nextWord() {
-  if (currentIndex >= shuffled.length) {
-    prompt.textContent = "🎉 All done!";
-    feedback.innerHTML = `<b>Final score: ${score} / ${shuffled.length}</b>`;
-    speak("All done! Great job!");
-    startBtn.disabled = false;
-    answer.disabled = true;
-    submitBtn.disabled = true;
-    repeatBtn.disabled = true;
-    if (missed.length > 0) missedWords.innerHTML = "<b>Missed Words:</b><br>" + missed.join(", ");
-    return;
-  }
-  currentWord = shuffled[currentIndex];
-  prompt.textContent = `Word #${currentIndex + 1}`;
-  speak(currentWord);
-  answer.value = "";
-  answer.focus();
-  updateProgress();
-}
-
-function repeatWord() { if (currentWord) speak(currentWord); }
-
-function highlightDifferences(user, correct) {
-  let result = "";
-  const maxLen = Math.max(user.length, correct.length);
-  for (let i = 0; i < maxLen; i++) {
-    if (user[i] === correct[i]) result += `<span>${correct[i] || ""}</span>`;
-    else result += `<span style="color:red;">${correct[i] || ""}</span>`;
-  }
-  return result;
-}
-
-function checkAnswer() {
-  const userWord = answer.value.trim().toLowerCase();
-  const correctWord = currentWord.toLowerCase();
-  const alternatePairs = { "moustache":"mustache","mustache":"moustache","artifacts":"artefacts","artefacts":"artifacts" };
-  if (userWord === correctWord || (alternatePairs[userWord] && alternatePairs[userWord] === correctWord)) {
-    feedback.innerHTML = `<span class="correct">✅ Correct!</span>`;
-    score++;
-  } else {
-    const diff = highlightDifferences(userWord, correctWord);
-    feedback.innerHTML = `<span class="incorrect">❌ Incorrect.</span> Correct spelling: <b>${diff}</b>`;
-    missed.push(correctWord);
-  }
-  scoreDisplay.textContent = `Score: ${score} / ${shuffled.length}`;
-  currentIndex++;
-  setTimeout(nextWord, 1500);
-}
-
-function updateProgress() {
-  const percent = ((currentIndex / shuffled.length) * 100).toFixed(0);
-  bar.style.width = percent + "%";
-}
-
-startBtn.addEventListener("click", startGame);
-submitBtn.addEventListener("click", checkAnswer);
-repeatBtn.addEventListener("click", repeatWord);
-answer.addEventListener("keyup", (e) => { if(e.key==="Enter") checkAnswer(); });
-</script>
-
-
-</head>
-<body>
-
-<h1>🐝 Spelling Bee Practice</h1>
-
-<!-- 🎙️ Voice selector -->
-<label for="voiceSelect"><b>Choose voice:</b></label>
-<select id="voiceSelect"></select>
-<br><br>
-
-<p id="prompt">Press "Start" to begin!</p>
-
-<input
-  id="answer"
-  type="text"
-  placeholder="Type the word..."
-  disabled
-  autocomplete="off"
-  autocorrect="off"
-  autocapitalize="off"
-  spellcheck="false"
-/>
-<br>
-<button id="start">Start</button>
-<button id="repeat" disabled>🔁 Repeat Word</button>
-<button id="submit" disabled>Submit</button>
-
-<div id="feedback"></div>
-
-<div id="progress">
-  <div id="bar"></div>
-</div>
-
-<p id="score">Score: 0 / 0</p>
-<div id="missedWords"></div>
-
-<script>
-const words = [
-  "hesitate", "scorcher", "scavenger", "fragments", "deflated", "unleash",
-  "ration", "cosmetics", "crawdad", "frustration", "unruly", "mascot",
-  "aroma", "moustache", "artifacts", "perfume", "discoveries", "sinister",
-  "tuxedo", "prognosis", "lurches", "language", "gallop", "buffalo",
-  "sequins", "fluently", "fabulous", "lanky", "sardines", "mysterious",
-  "brandished", "rickety", "anguish", "conical", "porridge", "lilt",
-  "pediatric", "beige", "democracy", "rummage", "gaunt", "ancestral",
-  "grimace", "nautical", "enormous", "geranium", "foreign", "dubious",
-  "ebony", "paltry"
-];
-
-let shuffled = [];
-let currentIndex = 0;
-let score = 0;
-let currentWord = "";
-let missed = [];
-let synth = window.speechSynthesis;
-let voices = [];
-let selectedVoice = null;
-
-// UI Elements
-const prompt = document.getElementById("prompt");
-const answer = document.getElementById("answer");
-const feedback = document.getElementById("feedback");
-const scoreDisplay = document.getElementById("score");
-const startBtn = document.getElementById("start");
-const submitBtn = document.getElementById("submit");
-const repeatBtn = document.getElementById("repeat");
-const bar = document.getElementById("bar");
-const voiceSelect = document.getElementById("voiceSelect");
-const missedWords = document.getElementById("missedWords");
-
-// 🔊 Load voices
-function populateVoices() {
-  voices = synth.getVoices().filter(v => v.lang.startsWith("en"));
-  voiceSelect.innerHTML = "";
-
-  voices.forEach((voice, i) => {
-    const option = document.createElement("option");
-    option.value = i;
-    option.textContent = `${voice.name} (${voice.lang})`;
-    voiceSelect.appendChild(option);
-  });
-
-  // Set default to Google US English if available
-  const googleVoice = voices.find(v => v.name.includes("Google US English"));
-  selectedVoice = googleVoice || voices.find(v => v.default) || voices[0];
-
-  // Set dropdown to that voice
-  if (selectedVoice) {
-    const index = voices.indexOf(selectedVoice);
-    if (index >= 0) voiceSelect.value = index;
-  }
-}
-
-populateVoices();
-if (speechSynthesis.onvoiceschanged !== undefined) {
-  speechSynthesis.onvoiceschanged = populateVoices;
-}
-
-voiceSelect.addEventListener("change", () => {
-  selectedVoice = voices[voiceSelect.value];
-});
-
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
-
-function speak(text) {
-  if (synth.speaking) synth.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = selectedVoice?.lang || "en-US";
-  utter.voice = selectedVoice || null;
-  utter.rate = 0.9;
-  synth.speak(utter);
-}
-
-function startGame() {
-  shuffled = shuffle([...words]);
-  currentIndex = 0;
-  score = 0;
-  missed = [];
-  feedback.textContent = "";
-  missedWords.innerHTML = "";
-  scoreDisplay.textContent = `Score: 0 / ${shuffled.length}`;
-  startBtn.disabled = true;
-  answer.disabled = false;
-  submitBtn.disabled = false;
-  repeatBtn.disabled = false;
-  nextWord();
-}
-
-function nextWord() {
-  if (currentIndex >= shuffled.length) {
-    prompt.textContent = "🎉 All done!";
-    feedback.innerHTML = `<b>Final score: ${score} / ${shuffled.length}</b>`;
-    speak("All done! Great job!");
-    startBtn.disabled = false;
-    answer.disabled = true;
-    submitBtn.disabled = true;
-    repeatBtn.disabled = true;
-
-    if (missed.length > 0) {
-      missedWords.innerHTML = "<b>Missed Words:</b><br>" + missed.join(", ");
-    }
-    return;
-  }
-
-  currentWord = shuffled[currentIndex];
-  prompt.textContent = `Word #${currentIndex + 1}`;
-  speak(currentWord);
-  answer.value = "";
-  answer.focus();
-  updateProgress();
-}
-
-function repeatWord() {
-  if (currentWord) speak(currentWord);
-}
-
-function highlightDifferences(user, correct) {
-  let result = "";
-  const maxLen = Math.max(user.length, correct.length);
-  for (let i = 0; i < maxLen; i++) {
-    if (user[i] === correct[i]) {
-      result += `<span>${correct[i] || ""}</span>`;
-    } else {
-      result += `<span style="color:red;">${correct[i] || ""}</span>`;
-    }
-  }
-  return result;
-}
-
-function checkAnswer() {
-  const userWord = answer.value.trim().toLowerCase();
-  const correctWord = currentWord.toLowerCase();
-
-  if (userWord === correctWord) {
-    feedback.innerHTML = `<span class="correct">✅ Correct!</span>`;
-    score++;
-  } else {
-    const diff = highlightDifferences(userWord, correctWord);
-    feedback.innerHTML = `<span class="incorrect">❌ Incorrect.</span> Correct spelling: <b>${diff}</b>`;
-    missed.push(correctWord);
-  }
-
-  scoreDisplay.textContent = `Score: ${score} / ${shuffled.length}`;
-  currentIndex++;
-  setTimeout(nextWord, 1500);
-}
-
-function updateProgress() {
-  const percent = ((currentIndex / shuffled.length) * 100).toFixed(0);
-  bar.style.width = percent + "%";
-}
-
-startBtn.addEventListener("click", startGame);
-submitBtn.addEventListener("click", checkAnswer);
-repeatBtn.addEventListener("click", repeatWord);
-answer.addEventListener("keyup", (e) => {
-  if (e.key === "Enter") checkAnswer();
-});
-</script>
-
-</body>
-</html>
+// Populate grade dropdown
+for (

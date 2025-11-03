@@ -1,427 +1,865 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spelling Bee Practice</title>
-<style>
-  body {
-    font-family: "Poppins", Arial, sans-serif;
-    text-align: center;
-    background: #fffbee;
-    margin-top: 50px;
-    color: #333;
-  }
-  h1 { color: #222; }
-  input {
-    font-size: 1.2rem;
-    padding: 8px;
-    width: 300px;
-    border-radius: 6px;
-    border: 1px solid #aaa;
-  }
-  button {
-    font-size: 1.1rem;
-    margin: 10px;
-    padding: 8px 16px;
-    cursor: pointer;
-    border-radius: 8px;
-    border: none;
-    background: #ffce00;
-    transition: all 0.2s ease;
-  }
-  button:hover { background: #ffd633; }
-  button:disabled { background: #ddd; cursor: not-allowed; }
-  .correct { color: green; font-weight: bold; }
-  .incorrect { color: red; font-weight: bold; }
-  #progress {
-    width: 80%;
-    margin: 20px auto;
-    background: #ddd;
-    border-radius: 10px;
-    overflow: hidden;
-    height: 20px;
-  }
-  #bar {
-    height: 100%;
-    background: #4CAF50;
-    width: 0%;
-    transition: width 0.4s ease;
-  }
-  #feedback { margin: 10px; height: 40px; }
-  select {
-    padding: 6px 8px;
-    border-radius: 6px;
-    border: 1px solid #aaa;
-    font-size: 1rem;
-  }
-  #missedWords {
-    margin-top: 20px;
-    font-size: 1rem;
-    color: #c00;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spelling Quiz - Grades 4-8</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .grade-selection {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .grade-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .grade-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: 2px solid #4CAF50;
+            background: white;
+            color: #4CAF50;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .grade-btn:hover, .grade-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .quiz-area {
+            display: none;
+            text-align: center;
+        }
+        
+        .word-display {
+            font-size: 24px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #e8f5e8;
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .audio-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        
+        .audio-btn:hover {
+            background: #1976D2;
+        }
+        
+        .input-area {
+            margin: 20px 0;
+        }
+        
+        .spelling-input {
+            font-size: 18px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            width: 300px;
+            max-width: 100%;
+        }
+        
+        .submit-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+        
+        .submit-btn:hover {
+            background: #45a049;
+        }
+        
+        .feedback {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .score {
+            text-align: center;
+            font-size: 18px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 5px;
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background-color: #f0f0f0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .progress-text {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .missed-words {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            text-align: left;
+        }
+        
+        .missed-words h3 {
+            margin: 0 0 10px 0;
+            color: #856404;
+            font-size: 16px;
+        }
+        
+        .missed-word-item {
+            margin: 8px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 3px;
+            border-left: 3px solid #dc3545;
+        }
+        
+        .user-spelling {
+            font-family: monospace;
+            font-size: 16px;
+        }
+        
+        .correct-letter {
+            color: #28a745;
+        }
+        
+        .incorrect-letter {
+            color: #dc3545;
+            background-color: #f8d7da;
+            padding: 1px 2px;
+            border-radius: 2px;
+        }
+        
+        .missing-letter {
+            color: #dc3545;
+            background-color: #f8d7da;
+            padding: 1px 2px;
+            border-radius: 2px;
+            text-decoration: underline;
+        }
+        
+        .correct-spelling {
+            font-weight: bold;
+            color: #28a745;
+            margin-left: 10px;
+        }
+        
+        .next-btn {
+            background: #FF9800;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        
+        .next-btn:hover {
+            background: #F57C00;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>🎯 Spelling Quiz</h1>
+        
+        <div class="grade-selection" id="gradeSelection">
+            <h2>Select Your Grade Level:</h2>
+            <div class="grade-buttons">
+                <button class="grade-btn" onclick="selectGrade(4)">Grade 4</button>
+                <button class="grade-btn" onclick="selectGrade(5)">Grade 5</button>
+                <button class="grade-btn" onclick="selectGrade(6)">Grade 6</button>
+                <button class="grade-btn" onclick="selectGrade(7)">Grade 7</button>
+                <button class="grade-btn" onclick="selectGrade(8)">Grade 8</button>
+            </div>
+        </div>
+        
+        <div class="quiz-area" id="quizArea">
+            <div class="progress-container">
+                <div class="progress-text" id="progressText">Progress: 0 of 0 words</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+            
+            <div class="score" id="scoreDisplay">Score: 0/0</div>
+            
+            <div class="missed-words" id="missedWordsContainer" style="display: none;">
+                <h3>📝 Words to Review:</h3>
+                <div id="missedWordsList"></div>
+            </div>
+            
+            <div class="word-display" id="wordDisplay">
+                Click "Hear Word" to start!
+            </div>
+            
+            <button class="audio-btn" onclick="speakWord()">🔊 Hear Word</button>
+            <button class="audio-btn" onclick="speakDefinition()">📖 Hear Definition</button>
+            
+            <div class="input-area">
+                <input type="text" class="spelling-input" id="spellingInput" 
+                       placeholder="Type the spelling here..." 
+                       onkeypress="handleKeyPress(event)">
+                <button class="submit-btn" onclick="checkSpelling()">Submit</button>
+            </div>
+            
+            <div class="feedback" id="feedback" style="display: none;"></div>
+            
+            <button class="next-btn" onclick="nextWord()" id="nextBtn" style="display: none;">Next Word</button>
+            
+            <button class="grade-btn" onclick="resetQuiz()" style="margin-top: 20px;">Change Grade</button>
+        </div>
+    </div>
 
-<h1>🐝 Spelling Bee Practice</h1>
+    <script>
+        // Word lists for each grade level
+        const wordLists = {
+            4: [
+                {word: "hesitate", definition: "to pause before acting"},
+                {word: "scorcher", definition: "extremely hot day"},
+                {word: "scavenger", definition: "one who searches for usable items"},
+                {word: "fragments", definition: "broken pieces"},
+                {word: "deflated", definition: "let air out of something"},
+                {word: "unleash", definition: "to release or set free"},
+                {word: "ration", definition: "limited portion of food"},
+                {word: "cosmetics", definition: "makeup products"},
+                {word: "crawdad", definition: "freshwater crustacean"},
+                {word: "frustration", definition: "feeling of being upset"},
+                {word: "unruly", definition: "difficult to control"},
+                {word: "mascot", definition: "symbol representing a group"},
+                {word: "aroma", definition: "pleasant smell"},
+                {word: "moustache", definition: "hair grown above the lip"},
+                {word: "artifacts", definition: "objects from the past"},
+                {word: "perfume", definition: "fragrant liquid"},
+                {word: "discoveries", definition: "things found or learned"},
+                {word: "sinister", definition: "threatening or evil"},
+                {word: "tuxedo", definition: "formal evening wear"},
+                {word: "prognosis", definition: "medical prediction"},
+                {word: "lurches", definition: "sudden unsteady movements"},
+                {word: "language", definition: "system of communication"},
+                {word: "gallop", definition: "horse's fastest gait"},
+                {word: "buffalo", definition: "large wild ox"},
+                {word: "sequins", definition: "small shiny discs for decoration"},
+                {word: "fluently", definition: "speaking smoothly and easily"},
+                {word: "fabulous", definition: "extraordinarily good"},
+                {word: "lanky", definition: "tall and thin"},
+                {word: "sardines", definition: "small fish often canned"},
+                {word: "mysterious", definition: "difficult to understand"},
+                {word: "brandished", definition: "waved threateningly"},
+                {word: "rickety", definition: "likely to collapse"},
+                {word: "anguish", definition: "severe mental pain"},
+                {word: "conical", definition: "cone-shaped"},
+                {word: "porridge", definition: "thick cereal"},
+                {word: "lilt", definition: "cheerful manner of speaking"},
+                {word: "pediatric", definition: "relating to children's medicine"},
+                {word: "beige", definition: "pale brown color"},
+                {word: "democracy", definition: "government by the people"},
+                {word: "rummage", definition: "search through things"},
+                {word: "gaunt", definition: "lean and haggard"},
+                {word: "ancestral", definition: "inherited from ancestors"},
+                {word: "grimace", definition: "facial expression of disgust"},
+                {word: "nautical", definition: "relating to ships or sailing"},
+                {word: "enormous", definition: "very large"},
+                {word: "geranium", definition: "flowering plant"},
+                {word: "foreign", definition: "from another country"},
+                {word: "dubious", definition: "doubtful"},
+                {word: "ebony", definition: "dark black wood"},
+                {word: "paltry", definition: "very small amount"}
+            ],
+            5: [
+                {word: "verdict", definition: "decision of a jury"},
+                {word: "garbled", definition: "confused or unclear"},
+                {word: "encourages", definition: "gives support or confidence"},
+                {word: "imitation", definition: "copy of something"},
+                {word: "miniature", definition: "very small version"},
+                {word: "receptionist", definition: "person who greets visitors"},
+                {word: "preamble", definition: "introductory statement"},
+                {word: "plausible", definition: "seeming reasonable"},
+                {word: "reprimanding", definition: "scolding severely"},
+                {word: "commotion", definition: "noisy disturbance"},
+                {word: "oblivion", definition: "state of being forgotten"},
+                {word: "immigrants", definition: "people who move to new country"},
+                {word: "steeple", definition: "tall tower on church"},
+                {word: "spectators", definition: "people watching an event"},
+                {word: "lanyards", definition: "cords worn around neck"},
+                {word: "suspicious", definition: "having doubts about"},
+                {word: "parchment", definition: "writing material from animal skin"},
+                {word: "ramshackle", definition: "falling apart"},
+                {word: "fugitive", definition: "person fleeing from law"},
+                {word: "heron", definition: "large wading bird"},
+                {word: "dissolving", definition: "breaking down in liquid"},
+                {word: "nomad", definition: "wandering person"},
+                {word: "billowed", definition: "swelled out like a sail"},
+                {word: "skewer", definition: "long pin for holding food"},
+                {word: "Berlin", definition: "capital city of Germany"},
+                {word: "lunacy", definition: "extreme foolishness"},
+                {word: "conjure", definition: "make appear by magic"},
+                {word: "bracken", definition: "large coarse fern"},
+                {word: "noggin", definition: "informal word for head"},
+                {word: "neon", definition: "bright electric light"},
+                {word: "rakish", definition: "having dashing appearance"},
+                {word: "hypnosis", definition: "trance-like state"},
+                {word: "rotunda", definition: "round building with dome"},
+                {word: "gusto", definition: "enthusiasm and energy"},
+                {word: "toiletries", definition: "personal hygiene items"},
+                {word: "gleaned", definition: "gathered information bit by bit"},
+                {word: "jeered", definition: "mocked rudely"},
+                {word: "winsome", definition: "attractive and charming"},
+                {word: "prattling", definition: "talking foolishly"},
+                {word: "galore", definition: "in abundance"},
+                {word: "emporium", definition: "large retail store"},
+                {word: "atrium", definition: "central court of building"},
+                {word: "eccentric", definition: "unconventional person"},
+                {word: "savant", definition: "person with special knowledge"},
+                {word: "almanac", definition: "annual calendar with information"},
+                {word: "hippies", definition: "1960s counterculture people"},
+                {word: "samosas", definition: "triangular fried pastries"},
+                {word: "campaign", definition: "organized effort to achieve goal"},
+                {word: "pistachio", definition: "green nut"},
+                {word: "mosque", definition: "Islamic place of worship"}
+            ],
+            6: [
+                {word: "zombielike", definition: "resembling the walking dead"},
+                {word: "warlock", definition: "male witch or sorcerer"},
+                {word: "colossus", definition: "giant statue or person"},
+                {word: "convulsively", definition: "with violent irregular movements"},
+                {word: "dimensional", definition: "relating to measurements"},
+                {word: "garishly", definition: "in a flashy, tasteless way"},
+                {word: "graffitist", definition: "person who draws on walls"},
+                {word: "Everest", definition: "world's highest mountain"},
+                {word: "dexterity", definition: "skill in using hands"},
+                {word: "cavorting", definition: "jumping about playfully"},
+                {word: "marauder", definition: "person who raids for plunder"},
+                {word: "conscience", definition: "inner sense of right and wrong"},
+                {word: "battlements", definition: "defensive castle walls"},
+                {word: "deferential", definition: "showing respect"},
+                {word: "albatross", definition: "large seabird"},
+                {word: "khaki", definition: "dull yellowish brown color"},
+                {word: "opalescent", definition: "showing rainbow colors"},
+                {word: "asphalt", definition: "black road surface material"},
+                {word: "Yiddish", definition: "Jewish language"},
+                {word: "talcum", definition: "soft mineral powder"},
+                {word: "tranquilizer", definition: "calming medicine"},
+                {word: "equestrian", definition: "relating to horseback riding"},
+                {word: "plaited", definition: "braided or woven"},
+                {word: "monsieur", definition: "French word for mister"},
+                {word: "manticores", definition: "mythical creatures"},
+                {word: "prestigious", definition: "having high status"},
+                {word: "fraidycat", definition: "cowardly person"},
+                {word: "guttural", definition: "harsh throat sound"},
+                {word: "lo mein", definition: "Chinese noodle dish (part 1)"},
+                {word: "courier", definition: "messenger"},
+                {word: "sans", definition: "without (French)"},
+                {word: "serif", definition: "decorative stroke on letters"},
+                {word: "psyche", definition: "human mind or soul"},
+                {word: "stucco", definition: "plaster for walls"},
+                {word: "Frankenstein", definition: "famous monster story"},
+                {word: "schema", definition: "organized plan or framework"},
+                {word: "et cetera", definition: "and the rest"},
+                {word: "vidimus", definition: "we have seen (Latin)"},
+                {word: "delphine", definition: "relating to dolphins"},
+                {word: "slough", definition: "swamp or shed skin"},
+                {word: "archipelago", definition: "group of islands"},
+                {word: "serape", definition: "Mexican shawl"},
+                {word: "puissance", definition: "power or strength"},
+                {word: "pinioning", definition: "binding wings or arms"},
+                {word: "chignon", definition: "upswept hairstyle"},
+                {word: "pheromone", definition: "chemical signal"},
+                {word: "galleon", definition: "large sailing ship"},
+                {word: "magnanimous", definition: "generous in spirit"},
+                {word: "chartreuse", definition: "bright yellow-green color"},
+                {word: "wainscoting", definition: "wooden wall paneling"},
+                {word: "Nehru", definition: "Indian political leader"}
+            ],
+            7: [
+                {word: "gangly", definition: "tall and awkward"},
+                {word: "swaggering", definition: "walking in arrogant way"},
+                {word: "chimneys", definition: "structures for smoke"},
+                {word: "riveted", definition: "fastened with metal bolts"},
+                {word: "plaid", definition: "checkered pattern"},
+                {word: "dirge", definition: "funeral song"},
+                {word: "zeal", definition: "great enthusiasm"},
+                {word: "whittled", definition: "carved with knife"},
+                {word: "depots", definition: "storage facilities"},
+                {word: "fiberglass", definition: "material made of glass fibers"},
+                {word: "salvaged", definition: "rescued from wreckage"},
+                {word: "fissures", definition: "narrow cracks"},
+                {word: "enthusiastic", definition: "showing great excitement"},
+                {word: "discipline", definition: "training for obedience"},
+                {word: "unfamiliar", definition: "not known or recognized"},
+                {word: "scurrying", definition: "moving quickly"},
+                {word: "dignitaries", definition: "important officials"},
+                {word: "pizzeria", definition: "pizza restaurant"},
+                {word: "dismissal", definition: "act of sending away"},
+                {word: "skittish", definition: "easily frightened"},
+                {word: "careened", definition: "moved swiftly and unsteadily"},
+                {word: "nomination", definition: "proposal for position"},
+                {word: "opportunist", definition: "person who takes advantage"},
+                {word: "dictatorship", definition: "rule by single person"},
+                {word: "comrades", definition: "close companions"},
+                {word: "sporadic", definition: "occurring irregularly"},
+                {word: "promenade", definition: "leisurely walk"},
+                {word: "repugnant", definition: "extremely distasteful"},
+                {word: "invincible", definition: "impossible to defeat"},
+                {word: "renowned", definition: "famous"},
+                {word: "parachute", definition: "device for safe landing"},
+                {word: "laborious", definition: "requiring much work"},
+                {word: "appointment", definition: "scheduled meeting"},
+                {word: "foreseeable", definition: "able to be predicted"},
+                {word: "ratify", definition: "approve formally"},
+                {word: "scalpel", definition: "surgical knife"},
+                {word: "reclusive", definition: "avoiding others"},
+                {word: "compassionate", definition: "showing sympathy"},
+                {word: "bulletin", definition: "brief news report"},
+                {word: "alfalfa", definition: "plant used for animal feed"},
+                {word: "officially", definition: "in authorized manner"},
+                {word: "confidant", definition: "trusted friend"},
+                {word: "bayonet", definition: "blade attached to rifle"},
+                {word: "amicable", definition: "friendly"},
+                {word: "exuberant", definition: "full of energy"},
+                {word: "beautician", definition: "person who does beauty treatments"},
+                {word: "equations", definition: "mathematical statements"},
+                {word: "assignment", definition: "task given to someone"},
+                {word: "ultimatum", definition: "final demand"},
+                {word: "whinnying", definition: "horse's gentle neighing"}
+            ],
+            8: [
+                {word: "squalor", definition: "state of being dirty"},
+                {word: "memoirs", definition: "autobiography"},
+                {word: "cylinders", definition: "round tube shapes"},
+                {word: "ominous", definition: "threatening"},
+                {word: "muffler", definition: "car exhaust silencer"},
+                {word: "syndrome", definition: "group of symptoms"},
+                {word: "premises", definition: "building and its grounds"},
+                {word: "safari", definition: "hunting expedition"},
+                {word: "lasagna", definition: "layered pasta dish"},
+                {word: "substantially", definition: "to a great degree"},
+                {word: "mercantile", definition: "relating to trade"},
+                {word: "formidable", definition: "inspiring fear"},
+                {word: "propaganda", definition: "biased information"},
+                {word: "marquee", definition: "large tent"},
+                {word: "proficient", definition: "skilled"},
+                {word: "compunction", definition: "feeling of guilt"},
+                {word: "emphatically", definition: "with emphasis"},
+                {word: "hyperventilated", definition: "breathed too rapidly"},
+                {word: "ostracism", definition: "exclusion from group"},
+                {word: "onslaught", definition: "fierce attack"},
+                {word: "ruefully", definition: "with regret"},
+                {word: "misanthrope", definition: "person who dislikes people"},
+                {word: "prototype", definition: "first model"},
+                {word: "cravenly", definition: "in cowardly manner"},
+                {word: "mulberry", definition: "dark purple berry"},
+                {word: "hypocritical", definition: "pretending to have virtues"},
+                {word: "chlorine", definition: "chemical element"},
+                {word: "traumatic", definition: "emotionally disturbing"},
+                {word: "receipts", definition: "proof of purchase"},
+                {word: "solemnly", definition: "seriously"},
+                {word: "begrudge", definition: "envy someone's possession"},
+                {word: "contentious", definition: "causing disagreement"},
+                {word: "precocious", definition: "advanced for age"},
+                {word: "ensemble", definition: "group performing together"},
+                {word: "cadre", definition: "core group of activists"},
+                {word: "lye", definition: "caustic solution"},
+                {word: "belfry", definition: "bell tower"},
+                {word: "lacrosse", definition: "team sport with sticks"},
+                {word: "sluice", definition: "water channel with gate"},
+                {word: "cajolery", definition: "persuasion by flattery"},
+                {word: "vigilance", definition: "careful watching"},
+                {word: "residuals", definition: "remaining amounts"},
+                {word: "boutique", definition: "small fashionable shop"},
+                {word: "peroxide", definition: "bleaching chemical"},
+                {word: "aristocracy", definition: "noble class"},
+                {word: "apocalypse", definition: "end of the world"},
+                {word: "tuberculosis", definition: "infectious lung disease"},
+                {word: "barricade", definition: "barrier blocking passage"},
+                {word: "confreres", definition: "colleagues"},
+                {word: "anonymously", definition: "without revealing identity"},
+                {word: "unparalleled", definition: "having no equal"},
+                {word: "barrette", definition: "hair clip"},
+                {word: "chassis", definition: "frame of vehicle"},
+                {word: "junket", definition: "trip at public expense"},
+                {word: "quandary", definition: "state of uncertainty"},
+                {word: "Erie", definition: "one of Great Lakes"},
+                {word: "gingham", definition: "checkered cotton fabric"},
+                {word: "silhouette", definition: "dark outline"},
+                {word: "auxiliary", definition: "providing support"},
+                {word: "thesaurus", definition: "book of synonyms"},
+                {word: "patriarchs", definition: "male heads of families"},
+                {word: "chandelier", definition: "hanging light fixture"},
+                {word: "dulce", definition: "sweet (Spanish)"},
+                {word: "concierge", definition: "hotel service person"},
+                {word: "latticework", definition: "framework of crossed strips"},
+                {word: "hibiscus", definition: "tropical flowering plant"},
+                {word: "tamale", definition: "Mexican corn dish"},
+                {word: "maracas", definition: "percussion instruments"},
+                {word: "gyroplane", definition: "aircraft with rotating wing"},
+                {word: "burpees", definition: "exercise movement"},
+                {word: "Adriatic", definition: "sea between Italy and Balkans"},
+                {word: "piccolo", definition: "small flute"},
+                {word: "au", definition: "goodbye (French, part 1)"},
+                {word: "revoir", definition: "goodbye (French, part 2)"},
+                {word: "tulle", definition: "fine netting fabric"},
+                {word: "boll", definition: "cotton seed pod (part 1)"},
+                {word: "weevil", definition: "cotton pest (part 2)"},
+                {word: "camphor", definition: "aromatic compound"},
+                {word: "Tucson", definition: "city in Arizona"},
+                {word: "paparazzi", definition: "aggressive photographers"},
+                {word: "pumpernickel", definition: "dark rye bread"},
+                {word: "pogrom", definition: "organized persecution"}
+            ]
+        };
 
-<label for="gradeSelect"><b>Select Grade:</b></label>
-<select id="gradeSelect"></select>
-<br><br>
+        let currentGrade = null;
+        let currentWords = [];
+        let currentWord = null;
+        let score = 0;
+        let totalAttempts = 0;
+        let usedWords = [];
+        let missedWords = [];
 
-<label for="voiceSelect"><b>Choose voice:</b></label>
-<select id="voiceSelect"></select>
-<br><br>
+        function selectGrade(grade) {
+            currentGrade = grade;
+            currentWords = [...wordLists[grade]];
+            usedWords = [];
+            score = 0;
+            totalAttempts = 0;
+            
+            // Update UI
+            document.getElementById('gradeSelection').style.display = 'none';
+            document.getElementById('quizArea').style.display = 'block';
+            
+            // Highlight selected grade button
+            document.querySelectorAll('.grade-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // FIXED: Automatically start with first word and speak it
+            nextWord();
+        }
 
-<p id="prompt">Press "Start" to begin!</p>
+        function getRandomWord() {
+            // Check if all words have been used
+            if (usedWords.length >= currentWords.length) {
+                return null; // No more words available
+            }
+            
+            let availableWords = currentWords.filter(word => !usedWords.includes(word.word));
+            let randomIndex = Math.floor(Math.random() * availableWords.length);
+            let selectedWord = availableWords[randomIndex];
+            
+            usedWords.push(selectedWord.word);
+            return selectedWord;
+        }
 
-<input
-  id="answer"
-  type="text"
-  placeholder="Type the word..."
-  disabled
-  autocomplete="off"
-  autocorrect="off"
-  autocapitalize="off"
-  spellcheck="false"
-/>
-<br>
-<button id="start">Start</button>
-<button id="repeat" disabled>🔁 Repeat Word</button>
-<button id="submit" disabled>Submit</button>
+        function nextWord() {
+            currentWord = getRandomWord();
+            
+            // Check if quiz is complete
+            if (!currentWord) {
+                endQuiz();
+                return;
+            }
+            
+            document.getElementById('wordDisplay').textContent = "Listen carefully and spell the word!";
+            document.getElementById('spellingInput').value = '';
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('spellingInput').focus();
+            updateScore();
+            updateProgress();
+            
+            // FIXED: Automatically speak the word after a short delay
+            setTimeout(() => {
+                speakWord();
+            }, 500);
+        }
+        
+        function endQuiz() {
+            document.getElementById('wordDisplay').textContent = `🎉 Quiz Complete! You've finished all ${currentWords.length} words for Grade ${currentGrade}!`;
+            document.getElementById('spellingInput').style.display = 'none';
+            document.querySelector('.submit-btn').style.display = 'none';
+            document.querySelector('.audio-btn').style.display = 'none';
+            document.querySelectorAll('.audio-btn')[1].style.display = 'none';
+            
+            const finalScore = Math.round((score / totalAttempts) * 100);
+            document.getElementById('scoreDisplay').textContent = `Final Score: ${score}/${totalAttempts} (${finalScore}%)`;
+        }
 
-<div id="feedback"></div>
+        function speakWord() {
+            if (currentWord && 'speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                speechSynthesis.cancel();
+                
+                setTimeout(() => {
+                    const utterance = new SpeechSynthesisUtterance(currentWord.word);
+                    utterance.rate = 0.7;
+                    utterance.pitch = 1;
+                    speechSynthesis.speak(utterance);
+                }, 100);
+                
+                document.getElementById('wordDisplay').textContent = `Listen carefully and spell the word!`;
+            } else {
+                document.getElementById('wordDisplay').textContent = `Spell: ${currentWord.word}`;
+            }
+        }
 
-<div id="progress">
-  <div id="bar"></div>
-</div>
+        function speakDefinition() {
+            if (currentWord && 'speechSynthesis' in window) {
+                speechSynthesis.cancel();
+                setTimeout(() => {
+                    const utterance = new SpeechSynthesisUtterance(`Definition: ${currentWord.definition}`);
+                    utterance.rate = 0.8;
+                    speechSynthesis.speak(utterance);
+                }, 100);
+            } else {
+                alert(`Definition: ${currentWord.definition}`);
+            }
+        }
 
-<p id="score">Score: 0 / 0</p>
-<div id="missedWords"></div>
+        function checkSpelling() {
+            const userInput = document.getElementById('spellingInput').value.trim().toLowerCase();
+            const correctSpelling = currentWord.word.toLowerCase();
+            const feedbackDiv = document.getElementById('feedback');
+            
+            // Define alternative spellings
+            const alternativeSpellings = {
+                'moustache': ['mustache'],
+                'mustache': ['moustache'],
+                'artifacts': ['artefacts'],
+                'artefacts': ['artifacts']
+            };
+            
+            totalAttempts++;
+            
+            // Check if the input matches the correct spelling or any alternative
+            let isCorrect = userInput === correctSpelling;
+            if (!isCorrect && alternativeSpellings[correctSpelling]) {
+                isCorrect = alternativeSpellings[correctSpelling].includes(userInput);
+            }
+            
+            if (isCorrect) {
+                score++;
+                feedbackDiv.className = 'feedback correct';
+                if (userInput === correctSpelling) {
+                    feedbackDiv.textContent = `✅ Correct! "${currentWord.word}" - ${currentWord.definition}`;
+                } else {
+                    feedbackDiv.textContent = `✅ Correct! "${userInput}" is an alternative spelling of "${currentWord.word}" - ${currentWord.definition}`;
+                }
+            } else {
+                feedbackDiv.className = 'feedback incorrect';
+                let correctOptions = [currentWord.word];
+                if (alternativeSpellings[correctSpelling]) {
+                    correctOptions = correctOptions.concat(alternativeSpellings[correctSpelling]);
+                }
+                feedbackDiv.textContent = `❌ Incorrect. Correct spelling(s): ${correctOptions.join(' or ')} - ${currentWord.definition}`;
+                
+                // Add to missed words list with highlighting
+                addMissedWord(userInput, currentWord.word, currentWord.definition);
+            }
+            
+            feedbackDiv.style.display = 'block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            updateScore();
+            
+            // FIXED: Automatically move to next word after 1.5 seconds
+            setTimeout(() => {
+                nextWord();
+            }, 1500);
+        }
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
+        function updateScore() {
+            document.getElementById('scoreDisplay').textContent = `Score: ${score}/${totalAttempts}`;
+        }
+        
+        function updateProgress() {
+            const wordsCompleted = usedWords.length;
+            const totalWords = currentWords.length;
+            const progressPercentage = (wordsCompleted / totalWords) * 100;
+            
+            document.getElementById('progressText').textContent = `Progress: ${wordsCompleted} of ${totalWords} words`;
+            document.getElementById('progressFill').style.width = `${progressPercentage}%`;
+        }
+        
+        function addMissedWord(userSpelling, correctSpelling, definition) {
+            const missedWord = {
+                user: userSpelling,
+                correct: correctSpelling,
+                definition: definition
+            };
+            
+            missedWords.push(missedWord);
+            updateMissedWordsList();
+        }
+        
+        function highlightDifferences(userSpelling, correctSpelling) {
+            const userChars = userSpelling.split('');
+            const correctChars = correctSpelling.split('');
+            let result = '';
+            
+            const maxLength = Math.max(userChars.length, correctChars.length);
+            
+            for (let i = 0; i < maxLength; i++) {
+                const userChar = userChars[i] || '';
+                const correctChar = correctChars[i] || '';
+                
+                if (userChar === correctChar) {
+                    result += `<span class="correct-letter">${userChar}</span>`;
+                } else if (userChar && correctChar) {
+                    result += `<span class="incorrect-letter">${userChar}</span>`;
+                } else if (userChar) {
+                    result += `<span class="incorrect-letter">${userChar}</span>`;
+                }
+            }
+            
+            return result;
+        }
+        
+        function updateMissedWordsList() {
+            const container = document.getElementById('missedWordsContainer');
+            const list = document.getElementById('missedWordsList');
+            
+            if (missedWords.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            list.innerHTML = '';
+            
+            missedWords.forEach((missed, index) => {
+                const item = document.createElement('div');
+                item.className = 'missed-word-item';
+                
+                const highlightedUser = highlightDifferences(missed.user, missed.correct);
+                
+                item.innerHTML = `
+                    <div>
+                        <span class="user-spelling">Your spelling: ${highlightedUser}</span>
+                        <span class="correct-spelling">→ ${missed.correct}</span>
+                    </div>
+                    <div style="font-size: 14px; color: #666; margin-top: 4px;">${missed.definition}</div>
+                `;
+                
+                list.appendChild(item);
+            });
+        }
 
-const wordLists = {
-  "4th Grade": [
-    "hesitate","scorcher","scavenger","fragments","deflated","unleash",
-    "ration","cosmetics","crawdad","frustration","unruly","mascot",
-    "aroma","moustache","mustache","artifacts","artefacts","perfume",
-    "discoveries","sinister","tuxedo","prognosis","lurches","language",
-    "gallop","buffalo","sequins","fluently","fabulous","lanky",
-    "sardines","mysterious","brandished","rickety","anguish","conical",
-    "porridge","lilt","pediatric","beige","democracy","rummage",
-    "gaunt","ancestral","grimace","nautical","enormous","geranium",
-    "foreign","dubious","ebony","paltry"
-  ],
-  "5th Grade": [
-    "verdict","garbled","encourages","imitation","miniature","receptionist",
-    "preamble","plausible","reprimanding","commotion","oblivion","immigrants",
-    "steeple","spectators","lanyards","suspicious","parchment","ramshackle",
-    "fugitive","heron","dissolving","nomad","billowed","skewer","Berlin",
-    "lunacy","conjure","bracken","noggin","neon","rakish","hypnosis",
-    "rotunda","gusto","toiletries","gleaned","jeered","winsome","prattling",
-    "galore","emporium","atrium","eccentric","savant","almanac","hippies",
-    "samosas","campaign","pistachio","mosque"
-  ],
-  "6th Grade": [
-    "zombielike","warlock","colossus","convulsively","dimensional","garishly",
-    "graffitist","Everest","dexterity","cavorting","marauder","conscience",
-    "battlements","deferential","albatross","khaki","opalescent","asphalt",
-    "Yiddish","talcum","tranquilizer","equestrian","plaited","monsieur",
-    "manticores","prestigious","fraidycat","guttural","lo","mein","courier",
-    "sans","serif","psyche","stucco","Frankenstein","schema","et","cetera",
-    "vidimus","delphine","slough","archipelago","serape","puissance",
-    "pinioning","chignon","pheromone","galleon","magnanimous","chartreuse",
-    "wainscoting","Nehru"
-  ],
-  "7th Grade": [
-    "gangly","swaggering","chimneys","riveted","plaid","dirge","zeal",
-    "whittled","depots","fiberglass","salvaged","fissures","enthusiastic",
-    "discipline","unfamiliar","scurrying","dignitaries","pizzeria","dismissal",
-    "skittish","careened","nomination","opportunist","dictatorship","comrades",
-    "sporadic","promenade","repugnant","invincible","renowned","parachute",
-    "laborious","appointment","foreseeable","ratify","scalpel","reclusive",
-    "compassionate","bulletin","alfalfa","officially","confidant","bayonet",
-    "amicable","exuberant","beautician","equations","assignment","ultimatum",
-    "whinnying"
-  ],
-  "8th Grade": [
-    "squalor","memoirs","cylinders","ominous","muffler","syndrome","premises",
-    "safari","lasagna","substantially","mercantile","formidable","propaganda",
-    "marquee","proficient","compunction","emphatically","hyperventilated",
-    "ostracism","onslaught","ruefully","misanthrope","prototype","cravenly",
-    "mulberry","hypocritical","chlorine","traumatic","receipts","solemnly",
-    "begrudge","contentious","precocious","ensemble","cadre","lye","belfry",
-    "lacrosse","sluice","cajolery","vigilance","residuals","boutique",
-    "peroxide","aristocracy","apocalypse","tuberculosis","barricade","confreres",
-    "anonymously","unparalleled","barrette","chassis","junket","quandary",
-    "Erie","gingham","silhouette","auxiliary","thesaurus","patriarchs",
-    "chandelier","dulce","concierge","latticework","hibiscus","tamale","maracas",
-    "gyroplane","burpees","Adriatic","piccolo","au","revoir","tulle","boll",
-    "weevil","camphor","Tucson","paparazzi","pumpernickel","pogrom"
-  ]
-};
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                if (document.getElementById('nextBtn').style.display !== 'none') {
+                    nextWord();
+                } else {
+                    checkSpelling();
+                }
+            }
+        }
 
-let selectedGrade = "4th Grade";
-let words = [...wordLists[selectedGrade]];
-let shuffled = [];
-let currentIndex = 0;
-let score = 0;
-let currentWord = "";
-let missed = [];
-let synth = window.speechSynthesis;
-let voices = [];
-let selectedVoice = null;
+        function resetQuiz() {
+            document.getElementById('gradeSelection').style.display = 'block';
+            document.getElementById('quizArea').style.display = 'none';
+            currentGrade = null;
+            score = 0;
+            totalAttempts = 0;
+            usedWords = [];
+            missedWords = [];
+            
+            // Reset UI elements
+            document.getElementById('spellingInput').style.display = 'inline-block';
+            document.querySelector('.submit-btn').style.display = 'inline-block';
+            document.querySelector('.audio-btn').style.display = 'inline-block';
+            document.querySelectorAll('.audio-btn')[1].style.display = 'inline-block';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressText').textContent = 'Progress: 0 of 0 words';
+            document.getElementById('missedWordsContainer').style.display = 'none';
+            document.getElementById('missedWordsList').innerHTML = '';
+        }
 
-// UI Elements
-const prompt = document.getElementById("prompt");
-const answer = document.getElementById("answer");
-const feedback = document.getElementById("feedback");
-const scoreDisplay = document.getElementById("score");
-const startBtn = document.getElementById("start");
-const submitBtn = document.getElementById("submit");
-const repeatBtn = document.getElementById("repeat");
-const bar = document.getElementById("bar");
-const voiceSelect = document.getElementById("voiceSelect");
-const gradeSelect = document.getElementById("gradeSelect");
-const missedWords = document.getElementById("missedWords");
-
-// --- Voice and Dropdown Setup ---
-
-// 🔊 Load voices
-function populateVoices() {
-  voices = synth.getVoices().filter(v => v.lang.startsWith("en"));
-  voiceSelect.innerHTML = "";
-
-  voices.forEach((voice, i) => {
-    const option = document.createElement("option");
-    option.value = i;
-    option.textContent = `${voice.name} (${voice.lang})`;
-    voiceSelect.appendChild(option);
-  });
-
-  // Set default to Google US English if available
-  const googleVoice = voices.find(v => v.name.includes("Google US English"));
-  selectedVoice = googleVoice || voices.find(v => v.default) || voices[0];
-
-  // Set dropdown to that voice
-  if (selectedVoice) {
-    const index = voices.indexOf(selectedVoice);
-    if (index >= 0) voiceSelect.value = index;
-  }
-}
-
-populateVoices();
-if (speechSynthesis.onvoiceschanged !== undefined) {
-  speechSynthesis.onvoiceschanged = populateVoices;
-}
-
-voiceSelect.addEventListener("change", () => {
-  selectedVoice = voices[voiceSelect.value];
-});
-
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
-
-function speak(text) {
-  if (synth.speaking) synth.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = selectedVoice?.lang || "en-US";
-  utter.voice = selectedVoice || null;
-  utter.rate = 0.9;
-  synth.speak(utter);
-}
-
-// Event listener for voice selection change
-//voiceSelect.addEventListener("change", () => {
-//    const voiceIndex = parseInt(voiceSelect.value);
-//    selectedVoice = voices[voiceIndex];
-//});
-
-// Populate grade dropdown
-for (const grade in wordLists) {
-    const option = document.createElement("option");
-    option.value = grade;
-    option.textContent = grade;
-    gradeSelect.appendChild(option);
-}
-gradeSelect.value = selectedGrade;
-
-// Function to reset state when grade changes or game starts
-function resetGame() {
-    shuffled = [];
-    currentIndex = 0;
-    score = 0;
-    currentWord = "";
-    missed = [];
-    feedback.textContent = "";
-    scoreDisplay.textContent = `Score: 0 / 0`;
-    missedWords.textContent = "";
-    bar.style.width = '0%';
-    prompt.textContent = "Press \"Start\" to begin!";
-    answer.value = "";
-    answer.disabled = true;
-    submitBtn.disabled = true;
-    repeatBtn.disabled = true;
-    startBtn.textContent = "Start";
-    startBtn.disabled = false;
-}
-
-// Grade change event listener
-gradeSelect.addEventListener("change", () => {
-    selectedGrade = gradeSelect.value;
-    words = [...wordLists[selectedGrade]]; // Update words list
-    resetGame();
-});
-
-// --- Remaining Game Logic Functions (Stubs for completion) ---
-
-// You will need to complete the following functions for the game to work:
-
-// Fisher-Yates (Knuth) Shuffle for words
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
-
-// Text-to-Speech function
-function speakWord(word) {
-    if (!synth || !selectedVoice) {
-        alert("Text-to-speech not available or voice not selected.");
-        return;
-    }
-    synth.cancel(); // Stop any current speech
-    const utterance = new SpeechSynthesisUtterance(word);
-    utterance.voice = selectedVoice;
-    utterance.rate = 0.7; // A bit slower for clarity
-    utterance.pitch = 1;
-    synth.speak(utterance);
-}
-
-// Function to start a new word
-function nextWord() {
-    if (currentIndex >= shuffled.length) {
-        endGame();
-        return;
-    }
-
-    currentWord = shuffled[currentIndex];
-    prompt.textContent = `Word ${currentIndex + 1} of ${shuffled.length}`;
-    answer.value = "";
-    answer.disabled = false;
-    submitBtn.disabled = false;
-    repeatBtn.disabled = false;
-    answer.focus();
-
-    speakWord(currentWord);
-
-    updateProgress();
-}
-
-// Function to update progress bar and score
-function updateProgress() {
-    const total = words.length;
-    const completed = currentIndex;
-    const percentage = (completed / total) * 100;
-    bar.style.width = `${percentage}%`;
-    scoreDisplay.textContent = `Score: ${score} / ${completed}`;
-
-    // Update missed words display
-    if (missed.length > 0) {
-        missedWords.innerHTML = '<strong>Missed Words:</strong> ' + missed.map(item => `${item.word} (${item.attempt})`).join(', ');
-    } else {
-        missedWords.textContent = '';
-    }
-}
-
-// Function to handle game submission
-function checkSpelling() {
-    const submission = answer.value.trim().toLowerCase();
-    const correct = currentWord.toLowerCase();
-
-    // Disable input and buttons while checking/displaying feedback
-    answer.disabled = true;
-    submitBtn.disabled = true;
-    repeatBtn.disabled = true;
-
-    if (submission === correct) {
-        feedback.className = "correct";
-        feedback.textContent = `✅ Correct! It's ${currentWord}.`;
-        score++;
-    } else {
-        feedback.className = "incorrect";
-        feedback.textContent = `❌ Incorrect. The correct spelling is ${currentWord}.`;
-        missed.push({ word: currentWord, attempt: submission });
-    }
-
-    currentIndex++;
-
-    // Wait a moment, then move to the next word or end the game
-    setTimeout(() => {
-        feedback.textContent = "";
-        nextWord();
-    }, 2000);
-}
-
-// Function to end the game
-function endGame() {
-    updateProgress();
-    const finalScore = `${score} / ${shuffled.length}`;
-    prompt.textContent = `Game Over! Final Score: ${finalScore}`;
-    startBtn.textContent = "Play Again";
-    startBtn.disabled = false;
-    answer.disabled = true;
-    submitBtn.disabled = true;
-    repeatBtn.disabled = true;
-
-    if (missed.length > 0) {
-        missedWords.innerHTML += '<br>Time to review your misses!';
-    }
-}
-
-// --- Event Handlers ---
-
-// Start Button
-startBtn.addEventListener("click", () => {
-    if (startBtn.textContent === "Start" || startBtn.textContent === "Play Again") {
-        resetGame(); // Ensure full reset on a new game
-        shuffled = shuffleArray([...words]);
-        nextWord();
-        startBtn.textContent = "Restart";
-    } else if (startBtn.textContent === "Restart") {
-        // Reset and start a new game with the current grade
-        resetGame();
-        startBtn.textContent = "Start";
-    }
-});
-
-// Submit Button
-submitBtn.addEventListener("click", checkSpelling);
-
-// Repeat Button
-repeatBtn.addEventListener("click", () => {
-    if (currentWord) {
-        speakWord(currentWord);
-    }
-});
-
-// Allow 'Enter' key to submit
-answer.addEventListener("keypress", (e) => {
-    if (e.key === "Enter" && !submitBtn.disabled) {
-        checkSpelling();
-    }
-});
-
-// Initial game state setup
-resetGame();
-
-});
-</script>
+        // Initialize speech synthesis on page load
+        window.addEventListener('load', function() {
+            if ('speechSynthesis' in window) {
+                // Preload voices
+                speechSynthesis.getVoices();
+            }
+        });
+    </script>
 </body>
 </html>

@@ -273,7 +273,7 @@
                 Click "Hear Word" to start!
             </div>
             
-            <button class="audio-btn" onclick="speakWord()">🔊 Hear Word</button>
+            <button class="audio-btn" onclick="speakWord()">🔊 Repeat Word</button>
             <button class="audio-btn" onclick="speakDefinition()">📖 Hear Definition</button>
             
             <div class="input-area">
@@ -740,10 +740,10 @@
             document.getElementById('nextBtn').style.display = 'inline-block';
             updateScore();
             
-            // FIXED: Automatically move to next word after 1.5 seconds
+            // FIXED: Automatically move to next word after 1 second
             setTimeout(() => {
                 nextWord();
-            }, 1500);
+            }, 1000);
         }
 
         function updateScore() {

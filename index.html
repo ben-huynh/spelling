@@ -246,6 +246,7 @@
         <div class="grade-selection" id="gradeSelection">
             <h2>Select Your Grade Level:</h2>
             <div class="grade-buttons">
+                <button class="grade-btn" onclick="selectGrade(3)">Grade 3</button>
                 <button class="grade-btn" onclick="selectGrade(4)">Grade 4</button>
                 <button class="grade-btn" onclick="selectGrade(5)">Grade 5</button>
                 <button class="grade-btn" onclick="selectGrade(6)">Grade 6</button>
@@ -294,6 +295,58 @@
     <script>
         // Word lists for each grade level
         const wordLists = {
+            3: [
+                {word: "unicorn", definition: "mythical horse with a horn"},
+                {word: "faraway", definition: "at a great distance"},
+                {word: "heater", definition: "device that warms a room"},
+                {word: "pirates", definition: "sea robbers"},
+                {word: "understand", definition: "to comprehend or grasp"},
+                {word: "wooden", definition: "made of wood"},
+                {word: "leaning", definition: "tilting to one side"},
+                {word: "breakfast", definition: "first meal of the day"},
+                {word: "window", definition: "glass opening in a wall"},
+                {word: "acrobat", definition: "performer of gymnastic feats"},
+                {word: "message", definition: "communication sent to someone"},
+                {word: "chocolate", definition: "sweet brown candy"},
+                {word: "forepaw", definition: "front foot of an animal"},
+                {word: "elephant", definition: "large animal with trunk"},
+                {word: "hedgehog", definition: "small spiny mammal"},
+                {word: "recipe", definition: "cooking instructions"},
+                {word: "garbage", definition: "waste or trash"},
+                {word: "surprise", definition: "unexpected event"},
+                {word: "mermaid", definition: "mythical sea creature"},
+                {word: "bombarded", definition: "attacked with many things"},
+                {word: "disability", definition: "physical or mental limitation"},
+                {word: "incredible", definition: "amazing or unbelievable"},
+                {word: "leather", definition: "material made from animal skin"},
+                {word: "countess", definition: "noble woman"},
+                {word: "nervous", definition: "worried or anxious"},
+                {word: "peppercorn", definition: "dried pepper berry"},
+                {word: "cartwheel", definition: "sideways hand-over-hand flip"},
+                {word: "raise", definition: "to lift up"},
+                {word: "weather", definition: "atmospheric conditions"},
+                {word: "zooming", definition: "moving very fast"},
+                {word: "attacked", definition: "assaulted or struck"},
+                {word: "turnout", definition: "number of people attending"},
+                {word: "eaten", definition: "consumed as food"},
+                {word: "streetlights", definition: "lamps that light streets"},
+                {word: "journey", definition: "trip or voyage"},
+                {word: "courtyard", definition: "open area surrounded by walls"},
+                {word: "shouting", definition: "yelling loudly"},
+                {word: "asleep", definition: "sleeping"},
+                {word: "curious", definition: "eager to know or learn"},
+                {word: "dinosaur", definition: "extinct prehistoric reptile"},
+                {word: "brilliant", definition: "very bright or smart"},
+                {word: "vacuum", definition: "space with no air"},
+                {word: "gorgeous", definition: "very beautiful"},
+                {word: "monsoon", definition: "seasonal rainy period"},
+                {word: "dangerous", definition: "likely to cause harm"},
+                {word: "avocado", definition: "green pear-shaped fruit"},
+                {word: "valentine", definition: "sweetheart or love card"},
+                {word: "February", definition: "second month of year"},
+                {word: "formation", definition: "arrangement or pattern"},
+                {word: "especially", definition: "particularly or specially"}
+            ],
             4: [
                 {word: "hesitate", definition: "to pause before acting"},
                 {word: "scorcher", definition: "extremely hot day"},
